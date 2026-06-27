@@ -18,13 +18,54 @@
         .page { background-color: #fdfdfd; box-shadow: inset 0 0 20px rgba(0,0,0,0.05); overflow: hidden; border: solid 1px #e5e5e5; }
         .page-cover { background-color: #4f46e5; color: white; background-image: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); }
         .page-content { padding: 24px; height: 100%; display: flex; flex-direction: column; }
-        .cromo-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 16px; flex-grow: 1; margin-top: 10px; }
-        .cromo-slot { aspect-ratio: 3/4; position: relative; border-radius: 6px; overflow: hidden; cursor: pointer; }
-        .cromo-filled { background-color: white; border: 3px solid white; display: flex; align-items: center; justify-content: center; }
+        
+        .cromo-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 16px; flex-grow: 1; margin-top: 10px; perspective: 1000px; }
+        
+        .cromo-slot { aspect-ratio: 3/4; position: relative; border-radius: 6px; overflow: hidden; transform-style: preserve-3d; transition: transform 0.3s ease; }
         .cromo-empty { background-color: #e5e7eb; border: 2px dashed #9ca3af; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: default; }
         .cromo-empty img { filter: grayscale(100%); opacity: 0.5; width: 100%; height: 100%; object-fit: cover; }
         
-        #modal-overlay, #confirm-overlay, #pending-trade-modal, #info-modal { display: none; position: fixed; inset: 0; z-index: 9999; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        /* Efecte Foil / Glare Hologràfic */
+        .cromo-filled { background-color: white; border: 3px solid white; display: flex; align-items: center; justify-content: center; cursor: pointer; transform-style: preserve-3d; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .cromo-filled:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04); z-index: 10; }
+        
+        .cromo-filled::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.6) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.6) 55%, transparent 80%);
+            background-size: 200% 200%;
+            background-position: 150% 150%;
+            opacity: 0;
+            transition: opacity 0.3s ease, background-position 0s;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+        }
+        
+        .cromo-filled::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 6;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            mix-blend-mode: hard-light;
+        }
+
+        .cromo-filled:hover::before, .cromo-filled:hover::after { opacity: 1; }
+
+        /* Classe de JS aplicada quan es mou el ratolí per fer que el glare passi de costat a costat */
+        .is-glaring::before { animation: hologlare 2s infinite linear; }
+
+        @keyframes hologlare {
+            0% { background-position: 150% 150%; }
+            100% { background-position: -50% -50%; }
+        }
+        
+        #modal-overlay, #confirm-overlay, #pending-trade-modal, #info-modal, #trade-duplicate-confirm-modal { display: none; position: fixed; inset: 0; z-index: 9999; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -54,7 +95,7 @@
             <div class="absolute -top-10 -right-10 text-indigo-100 opacity-50">
                 <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
             </div>
-            <h2 class="text-2xl font-bold mb-2 text-indigo-700 relative z-10">Has aconseguit un sobre!</h2>
+            <h2 id="packet-alert-title" class="text-2xl font-bold mb-2 text-indigo-700 relative z-10">Has aconseguit un sobre!</h2>
             <p class="text-gray-600 mb-6 relative z-10">Tens cromos nous pendents d'obrir.</p>
             <button onclick="obrirSobre()" class="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition shadow-lg relative z-10">Obrir el sobre</button>
         </div>
@@ -100,7 +141,7 @@
                 <option value="">-- Tria un perfil --</option>
             </select>
             
-            <div id="admin-user-details" class="hidden grid grid-cols-1 md:grid-cols-5 gap-4 bg-indigo-50 p-4 rounded-lg border border-indigo-200 mb-6 items-end">
+            <div id="admin-user-details" class="hidden grid grid-cols-1 md:grid-cols-6 gap-4 bg-indigo-50 p-4 rounded-lg border border-indigo-200 mb-6 items-end">
                 <div><p class="text-xs font-bold text-indigo-800 uppercase mb-1">ID / NIU</p><p id="admin-info-id" class="text-gray-900 font-semibold p-2 bg-white rounded border border-gray-200 h-[42px] flex items-center"></p></div>
                 <div>
                     <p class="text-xs font-bold text-indigo-800 uppercase mb-1">Contrasenya</p>
@@ -116,12 +157,28 @@
                 </div>
                 <div><p class="text-xs font-bold text-indigo-800 uppercase mb-1">Nom</p><input type="text" id="admin-info-nom" class="w-full text-gray-900 font-semibold bg-white border border-gray-300 rounded p-2 outline-none focus:ring-2 focus:ring-indigo-500 h-[42px]"></div>
                 <div><p class="text-xs font-bold text-indigo-800 uppercase mb-1">Correu</p><input type="email" id="admin-info-correu" class="w-full text-gray-900 font-semibold bg-white border border-gray-300 rounded p-2 outline-none focus:ring-2 focus:ring-indigo-500 h-[42px]"></div>
+                
+                <!-- NOU: Progrés de l'Usuari -->
+                <div>
+                    <p class="text-xs font-bold text-indigo-800 uppercase mb-1">Progrés</p>
+                    <div class="h-[42px] bg-white border border-gray-300 rounded overflow-hidden relative flex items-center justify-center shadow-inner">
+                        <div id="admin-info-progress-bar" class="absolute top-0 left-0 bottom-0 bg-emerald-400 transition-all duration-1000 z-0" style="width: 0%;"></div>
+                        <span id="admin-info-progress-text" class="relative z-10 font-bold text-gray-900 text-sm drop-shadow-sm"></span>
+                    </div>
+                </div>
+
                 <div class="flex flex-col gap-2">
                     <button onclick="guardarDadesUsuariAdmin()" class="bg-indigo-600 text-white py-1 px-2 rounded text-sm font-bold shadow hover:bg-indigo-700 transition">Desar Perfil</button>
-                    <button onclick="assignarSobreAdmin()" class="bg-fuchsia-600 text-white py-1 px-2 rounded text-sm font-bold shadow hover:bg-fuchsia-700 transition flex items-center justify-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                        Regalar Sobre
-                    </button>
+                    <div class="flex">
+                        <select id="admin-pack-type" class="w-1/3 bg-gray-200 border-none text-xs rounded-l outline-none focus:ring-0 cursor-pointer font-bold text-gray-700">
+                            <option value="Normal">🟨 Normal</option>
+                            <option value="Magic">🟪 Màgic</option>
+                        </select>
+                        <button onclick="assignarSobreAdmin()" class="w-2/3 bg-fuchsia-600 text-white py-1 px-2 rounded-r text-sm font-bold shadow hover:bg-fuchsia-700 transition flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                            Donar Sobre
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -239,7 +296,7 @@
             <div id="sollicitats-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
         </div>
 
-        <!-- FILTRES DE MERCAT (NOU) -->
+        <!-- FILTRES DE MERCAT -->
         <div class="bg-white p-4 rounded-xl shadow-md mb-8 border border-gray-200">
             <h3 class="text-sm font-bold text-gray-800 uppercase mb-3 flex items-center gap-2">
                 <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
@@ -269,7 +326,16 @@
     </div>
 
     <!-- MODALS DIVERSES -->
-    <div id="modal-overlay" onclick="tancarImatgeModal()"><img id="modal-img" class="max-w-[90%] max-h-[90%] object-contain" onclick="event.stopPropagation()"></div>
+    
+    <!-- MODAL IMATGE AMPLIADA AMB EFECTE FOIL -->
+    <div id="modal-overlay" class="modal" onclick="tancarImatgeModal()">
+        <div id="modal-card-container" class="cromo-filled is-glaring relative rounded-2xl w-auto h-[75vh] md:h-[85vh] aspect-[3/4] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-8 border-white transform-gpu transition-transform duration-200" 
+             onclick="event.stopPropagation()"
+             onmousemove="animarCromoAmbRato(event, this)"
+             onmouseleave="resetAnimacioCromo(this)">
+            <img id="modal-img" class="w-full h-full object-cover rounded-lg relative z-[1]">
+        </div>
+    </div>
     
     <div id="confirm-overlay">
         <div class="bg-white p-6 rounded-lg text-center max-w-xs shadow-2xl">
@@ -340,6 +406,7 @@
         let isPassVisible = false;
         
         let pendingPacketRow = null;
+        let pendingPacketType = "Normal";
         let cromosAgafats = 0;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -353,6 +420,35 @@
                 obrirModalUI('new-password-modal');
             }
         });
+
+        // Funció per animar l'holograma als cromos
+        function animarCromoAmbRato(event, card) {
+            const rect = card.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // Càlcul de la inclinació 3D
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -15; // Màx 15 graus
+            const rotateY = ((x - centerX) / centerX) * 15;
+            
+            // Càlcul per moure l'efecte glare/foil amb ratolí (menys si te la classe de animació automàtica)
+            if(!card.classList.contains('is-glaring')){
+               const bgPosX = (x / rect.width) * 100;
+               const bgPosY = (y / rect.height) * 100;
+               card.style.setProperty('--glare-x', `${bgPosX}%`);
+               card.style.setProperty('--glare-y', `${bgPosY}%`);
+               card.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`; 
+            }
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+        }
+
+        function resetAnimacioCromo(card) {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            card.classList.remove('is-glaring');
+        }
 
         function getTotalCromosConfigurats() {
             if (allSections.length === 0) return 80; 
@@ -372,35 +468,62 @@
 
             const cromosSobre = [];
             const maxCromos = getTotalCromosConfigurats();
+            const userStickers = allUsersData[currentUserId] || {};
 
+            // Lògica si el sobre és Màgic
+            if (pendingPacketType === "Magic") {
+                // Busquem quins cromos falten per garantir-ne almenys un
+                const cromosFaltants = [];
+                for(let i = 1; i <= maxCromos; i++) {
+                    if((userStickers[i] || 0) === 0) cromosFaltants.push(i);
+                }
+
+                if (cromosFaltants.length > 0) {
+                    const idxRandom = Math.floor(Math.random() * cromosFaltants.length);
+                    cromosSobre.push(cromosFaltants[idxRandom]);
+                }
+            }
+
+            // Emplenar la resta del sobre fins a 4 cromos
             while(cromosSobre.length < 4) {
                 const rand = Math.floor(Math.random() * maxCromos) + 1;
                 if(!cromosSobre.includes(rand)) cromosSobre.push(rand);
             }
+            
+            // Barrejar perquè el garantit (si hi és) no surti sempre primer
+            cromosSobre.sort(() => Math.random() - 0.5);
 
             const grid = document.getElementById('packet-cards-grid');
             grid.innerHTML = '';
             
             cromosSobre.forEach(cromoId => {
                 const card = document.createElement('div');
-                card.className = "bg-white p-2 rounded-xl shadow-2xl cursor-pointer transform hover:scale-105 transition-all duration-300 relative aspect-[3/4] flex flex-col";
+                card.className = "bg-white p-2 rounded-xl shadow-2xl cursor-pointer transform hover:scale-105 transition-all duration-300 relative aspect-[3/4] flex flex-col cromo-filled is-glaring border-4 border-indigo-100";
+                card.style.transformStyle = "preserve-3d";
+                
                 card.innerHTML = `
-                    <div id="cromo-cover-${cromoId}" class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-xl flex flex-col items-center justify-center z-10 transition-opacity duration-700">
+                    <div id="cromo-cover-${cromoId}" class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-xl flex flex-col items-center justify-center z-[15] transition-opacity duration-700">
                         <svg class="w-12 h-12 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         <span class="text-white font-bold tracking-widest uppercase text-xs">Obre'm</span>
                     </div>
-                    <img src="${BASE_IMAGE_URL}${String(cromoId).padStart(3, '0')}.jpg" class="w-full h-full object-cover rounded-lg">
-                    <div id="cromo-check-${cromoId}" class="absolute inset-0 bg-emerald-500/80 rounded-xl flex items-center justify-center z-20 opacity-0 transition-opacity duration-300">
+                    <img src="${BASE_IMAGE_URL}${String(cromoId).padStart(3, '0')}.jpg" class="w-full h-full object-cover rounded-lg relative z-[1]">
+                    <div id="cromo-check-${cromoId}" class="absolute inset-0 bg-emerald-500/80 rounded-xl flex items-center justify-center z-20 opacity-0 transition-opacity duration-300 pointer-events-none">
                         <svg class="w-16 h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                 `;
                 
+                card.addEventListener('mousemove', (e) => animarCromoAmbRato(e, card));
+                card.addEventListener('mouseleave', () => resetAnimacioCromo(card));
+
                 let clicked = false;
                 card.onclick = async () => {
                     if (clicked) return;
                     clicked = true;
                     
                     document.getElementById(`cromo-cover-${cromoId}`).style.opacity = '0';
+                    card.classList.remove('border-indigo-100');
+                    card.classList.add('border-white');
+                    card.classList.remove('is-glaring'); // Aturem animació automàtica i deixem al ratolí
                     
                     if (!allUsersData[currentUserId]) allUsersData[currentUserId] = {};
                     allUsersData[currentUserId][cromoId] = (allUsersData[currentUserId][cromoId] || 0) + 1;
@@ -435,6 +558,15 @@
                 const res = await getJSONP(APPS_SCRIPT_URL + "?action=checkSobres&id=" + encodeURIComponent(currentUserId));
                 if (res.hasSobre) {
                     pendingPacketRow = res.rowIndex;
+                    pendingPacketType = res.type;
+                    const alertTitle = document.getElementById('packet-alert-title');
+                    if (res.type === "Magic") {
+                        alertTitle.innerText = "Has aconseguit un Sobre Màgic!";
+                        alertTitle.className = "text-2xl font-bold mb-2 text-fuchsia-600 relative z-10 animate-pulse";
+                    } else {
+                        alertTitle.innerText = "Has aconseguit un sobre!";
+                        alertTitle.className = "text-2xl font-bold mb-2 text-indigo-700 relative z-10";
+                    }
                     obrirModalUI('packet-alert-modal');
                 }
             } catch(e) { console.error(e); }
@@ -602,9 +734,12 @@
             grid.innerHTML = '';
             
             const maxCromos = getTotalCromosConfigurats();
+            let unicsAconseguits = 0;
             
             for (let i = 1; i <= maxCromos; i++) {
                 const qty = userStickers[i] || 0;
+                if (qty > 0) unicsAconseguits++;
+                
                 const bgClass = qty === 0 ? 'bg-red-100' : 'bg-green-100';
                 grid.innerHTML += `
                     <div id="admin-cromo-container-${i}" class="border rounded-lg p-2 text-center ${bgClass} flex flex-col items-center justify-center transition-colors shadow-sm">
@@ -613,6 +748,11 @@
                     </div>
                 `;
             }
+            
+            const percentatge = maxCromos > 0 ? Math.round((unicsAconseguits / maxCromos) * 100) : 0;
+            document.getElementById('admin-info-progress-text').innerText = `${unicsAconseguits} / ${maxCromos} (${percentatge}%)`;
+            document.getElementById('admin-info-progress-bar').style.width = `${percentatge}%`;
+
             collectionDiv.classList.remove('hidden');
         }
 
@@ -669,19 +809,21 @@
         async function assignarSobreAdmin() {
             if (!currentAdminEditingId) return;
             
-            mostrarInfoModal("Assignant un nou sobre...");
+            const type = document.getElementById('admin-pack-type').value;
+            mostrarInfoModal(`Assignant un nou sobre (${type})...`);
 
             try {
                 fetch(APPS_SCRIPT_URL, {
                     method: 'POST', mode: 'no-cors',
                     body: JSON.stringify({
                         action: 'assignPackAdmin',
-                        userId: currentAdminEditingId
+                        userId: currentAdminEditingId,
+                        type: type
                     })
                 });
                 
                 setTimeout(() => {
-                    mostrarInfoModal("S'ha assignat un sobre de cromos correctament a aquest usuari.");
+                    mostrarInfoModal("S'ha assignat el sobre correctament a aquest usuari.");
                 }, 1500);
             } catch(e) {
                 mostrarInfoModal("Error de connexió en assignar el sobre.");
@@ -717,6 +859,7 @@
                 setTimeout(async () => {
                     mostrarInfoModal("La col·lecció s'ha desat correctament.");
                     await recarregarDades(); 
+                    carregarUsuariAdmin(currentAdminEditingId);
                 }, 1500);
             } catch(e) {
                 mostrarInfoModal("Hi ha hagut un problema en connectar amb el servidor.");
@@ -851,6 +994,17 @@
                 const res = await getJSONP(APPS_SCRIPT_URL + "?action=checkSobres&id=" + encodeURIComponent(currentUserId));
                 if (res.hasSobre) {
                     pendingPacketRow = res.rowIndex;
+                    pendingPacketType = res.type || "Normal";
+                    
+                    const alertTitle = document.getElementById('packet-alert-title');
+                    if (pendingPacketType === "Magic") {
+                        alertTitle.innerText = "Has aconseguit un Sobre Màgic!";
+                        alertTitle.className = "text-2xl font-bold mb-2 text-fuchsia-600 relative z-10 animate-pulse";
+                    } else {
+                        alertTitle.innerText = "Has aconseguit un sobre!";
+                        alertTitle.className = "text-2xl font-bold mb-2 text-indigo-700 relative z-10";
+                    }
+                    
                     obrirModalUI('packet-alert-modal');
                 }
             } catch(e) { console.error("Error al validar sobres:", e); }
@@ -885,7 +1039,9 @@
                 </div>
                 <div class="text-center">
                     <p class="text-xs font-bold text-emerald-600 mb-1 uppercase">Has rebut</p>
-                    <img src="${BASE_IMAGE_URL}${String(trade.cromo).padStart(3, '0')}.jpg" class="w-24 h-32 object-cover rounded shadow border border-emerald-300">
+                    <div class="w-24 h-32 cromo-filled is-glaring border border-emerald-300 rounded shadow">
+                        <img src="${BASE_IMAGE_URL}${String(trade.cromo).padStart(3, '0')}.jpg" class="w-full h-full object-cover rounded-sm relative z-[1]">
+                    </div>
                     <p class="font-bold text-emerald-700 mt-2 text-lg">#${trade.cromo}</p>
                 </div>
             `;
@@ -906,6 +1062,12 @@
             };
             
             obrirModalUI('trade-informed-modal');
+            
+            const cardRebut = document.querySelector('#informed-images .cromo-filled');
+            if(cardRebut) {
+                 cardRebut.addEventListener('mousemove', (e) => animarCromoAmbRato(e, cardRebut));
+                 cardRebut.addEventListener('mouseleave', () => resetAnimacioCromo(cardRebut));
+            }
         }
 
         async function recarregarDades() {
@@ -954,7 +1116,6 @@
                 rankingData.push({ userId, nom, unics });
             }
 
-            // Ordenar de major a menor quantitat de cromos
             rankingData.sort((a, b) => b.unics - a.unics);
 
             const list = document.getElementById('ranking-list');
@@ -1007,6 +1168,12 @@
             bookEl.innerHTML = generarPagines(userStickers);
             wrapper.appendChild(bookEl);
 
+            // Activar efectes Foil a l'àlbum acabat de generar
+            bookEl.querySelectorAll('.cromo-filled').forEach(card => {
+                card.addEventListener('mousemove', (e) => animarCromoAmbRato(e, card));
+                card.addEventListener('mouseleave', () => resetAnimacioCromo(card));
+            });
+
             pageFlipInstance = new St.PageFlip(bookEl, { 
                 width: 380, height: 520, size: "stretch", minWidth: 280, maxWidth: 450, 
                 minHeight: 380, maxHeight: 650, showCover: true, clickEventForward: false,
@@ -1017,7 +1184,6 @@
         }
 
         function generarPagines(userStickers) {
-            // Càlcul del progrés total per la portada
             const maxCromos = getTotalCromosConfigurats();
             let unicsAconseguits = 0;
             for (let i = 1; i <= maxCromos; i++) {
@@ -1044,10 +1210,9 @@
             </div>`;
 
             let currentStickerId = 1;
-            let countPages = 1; // Portada
+            let countPages = 1; 
 
             if (allSections.length === 0) {
-                // Per defecte 80
                 for (let p = 0; p < 20; p++) {
                     html += `<div class="page"><div class="page-content"><div class="cromo-grid">`;
                     for (let i = 1; i <= 4; i++) {
@@ -1056,8 +1221,8 @@
                         let imgUrl = `${BASE_IMAGE_URL}${String(id).padStart(3, '0')}.jpg`;
                         if (qty > 0) {
                             html += `<div class="cromo-slot cromo-filled shadow" onmousedown="event.stopPropagation();" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="obrirImatgeModal('${imgUrl}', event)">
-                                        <img src="${imgUrl}" class="w-full h-full object-cover">
-                                        ${qty > 1 ? `<span class="absolute top-1 right-1 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow">${qty}</span>` : ''}
+                                        <img src="${imgUrl}" class="w-full h-full object-cover relative z-[1]">
+                                        ${qty > 1 ? `<span class="absolute top-1 right-1 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow z-[10]">${qty}</span>` : ''}
                                      </div>`;
                         } else {
                             html += `<div class="cromo-slot cromo-empty"><img src="${imgUrl}"><span class="absolute font-bold text-gray-400">#${id}</span></div>`;
@@ -1089,8 +1254,8 @@
                                 let imgUrl = `${BASE_IMAGE_URL}${String(id).padStart(3, '0')}.jpg`;
                                 if (qty > 0) {
                                     html += `<div class="cromo-slot cromo-filled shadow" onmousedown="event.stopPropagation();" onpointerdown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="obrirImatgeModal('${imgUrl}', event)">
-                                                <img src="${imgUrl}" class="w-full h-full object-cover">
-                                                ${qty > 1 ? `<span class="absolute top-1 right-1 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow">${qty}</span>` : ''}
+                                                <img src="${imgUrl}" class="w-full h-full object-cover relative z-[1]">
+                                                ${qty > 1 ? `<span class="absolute top-1 right-1 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow z-[10]">${qty}</span>` : ''}
                                              </div>`;
                                 } else {
                                     html += `<div class="cromo-slot cromo-empty"><img src="${imgUrl}"><span class="absolute font-bold text-gray-400">#${id}</span></div>`;
@@ -1130,7 +1295,6 @@
             });
         }
 
-        /* Funcions per gestionar on pertany cada cromo i filtres */
         function getIndexSeccioPerCromo(cromoId) {
             if (allSections.length === 0) return -1;
             let limitAcumulat = 0;
@@ -1201,16 +1365,19 @@
 
                 const nomSollicitant = getNomUsuari(sollicitant);
                 const card = document.createElement('div');
-                card.className = "bg-red-50 border border-red-200 p-2 rounded shadow text-center flex flex-col items-center justify-center relative cursor-pointer hover:bg-red-100 hover:scale-105 transition-all";
+                card.className = "bg-red-50 border border-red-200 p-2 rounded shadow text-center flex flex-col items-center justify-center relative cursor-pointer hover:bg-red-100 hover:scale-105 transition-all cromo-filled";
                 card.innerHTML = `
-                    <span class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow animate-pulse">Respon!</span>
-                    <img src="${BASE_IMAGE_URL}${String(cromoId).padStart(3, '0')}.jpg" class="w-full h-40 object-contain mb-2 mt-4">
-                    <p class="font-bold text-lg text-red-900">#${cromoId}</p>
-                    <div class="mt-2 text-xs w-full">
+                    <span class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow animate-pulse z-[10]">Respon!</span>
+                    <img src="${BASE_IMAGE_URL}${String(cromoId).padStart(3, '0')}.jpg" class="w-full h-40 object-contain mb-2 mt-4 relative z-[1]">
+                    <p class="font-bold text-lg text-red-900 z-[1]">#${cromoId}</p>
+                    <div class="mt-2 text-xs w-full z-[1]">
                         <p class="text-red-600 font-bold">Petició de:</p>
                         <p class="bg-red-100 text-red-800 rounded px-2 py-1 mt-1 truncate" title="${nomSollicitant}">${nomSollicitant}</p>
                     </div>`;
                 
+                card.addEventListener('mousemove', (e) => animarCromoAmbRato(e, card));
+                card.addEventListener('mouseleave', () => resetAnimacioCromo(card));
+
                 card.onclick = async () => {
                     await recarregarDades();
                     const stickersActuals = allUsersData[currentUserId] || {};
@@ -1239,20 +1406,23 @@
                 currentUserRequests.forEach(req => {
                     const nomPropietari = getNomUsuari(req.propietari);
                     const card = document.createElement('div');
-                    card.className = "bg-indigo-50 border border-indigo-200 p-2 rounded shadow text-center flex flex-col items-center justify-center relative cursor-default";
+                    card.className = "bg-indigo-50 border border-indigo-200 p-2 rounded shadow text-center flex flex-col items-center justify-center relative cursor-default cromo-filled is-glaring";
                     card.innerHTML = `
-                        <span class="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow">Pendent</span>
-                        <img src="${BASE_IMAGE_URL}${String(req.cromo).padStart(3, '0')}.jpg" class="w-full h-40 object-contain mb-2 mt-4">
-                        <p class="font-bold text-lg text-indigo-900">#${req.cromo}</p>
-                        <div class="mt-2 text-xs w-full">
+                        <span class="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow z-[10]">Pendent</span>
+                        <img src="${BASE_IMAGE_URL}${String(req.cromo).padStart(3, '0')}.jpg" class="w-full h-40 object-contain mb-2 mt-4 relative z-[1]">
+                        <p class="font-bold text-lg text-indigo-900 z-[1]">#${req.cromo}</p>
+                        <div class="mt-2 text-xs w-full z-[1]">
                             <p class="text-indigo-600 font-bold">Esperant a:</p>
                             <p class="bg-indigo-100 text-indigo-800 rounded px-2 py-1 mt-1 truncate" title="${nomPropietari}">${nomPropietari}</p>
                         </div>`;
+                    
+                    card.addEventListener('mousemove', (e) => animarCromoAmbRato(e, card));
+                    card.addEventListener('mouseleave', () => { resetAnimacioCromo(card); card.classList.add('is-glaring'); });
+
                     sollicitatsGrid.appendChild(card);
                 });
             }
 
-            // Aplicar filtres de mercat de la graella de baix
             aplicarFiltresMercat();
         }
 
@@ -1268,21 +1438,14 @@
             const userStickers = allUsersData[currentUserId] || {};
 
             const filtrats = currentMarketCromos.filter(item => {
-                // 1. Ocultar si ja ho he demanat a aquest usuari concret
                 const isRequestedByMe = currentUserRequests.some(req => 
                     String(req.propietari) === String(item.userId) && parseInt(req.cromo) === item.id
                 );
                 if (isRequestedByMe) return false;
-
-                // 2. Filtre Cerca Número
                 if (!isNaN(searchValue) && item.id !== searchValue) return false;
-
-                // 3. Filtre Secció
                 if (sectionValue !== "") {
                     if (getIndexSeccioPerCromo(item.id) !== parseInt(sectionValue)) return false;
                 }
-
-                // 4. Filtre "Només els que em falten"
                 if (onlyMissing) {
                     if ((userStickers[item.id] || 0) > 0) return false;
                 }
@@ -1303,13 +1466,16 @@
                 filtrats.forEach(item => {
                     const nomPropietari = getNomUsuari(item.userId);
                     const card = document.createElement('div');
-                    card.className = "bg-white p-2 rounded shadow cursor-pointer text-center flex flex-col items-center justify-center hover:scale-105 transition-transform border border-gray-100";
+                    card.className = "bg-white p-2 rounded shadow cursor-pointer text-center flex flex-col items-center justify-center transition-transform border border-gray-100 cromo-filled is-glaring";
                     card.innerHTML = `
-                        <img src="${BASE_IMAGE_URL}${String(item.id).padStart(3, '0')}.jpg" class="w-full h-40 object-contain mb-2">
-                        <p class="font-bold text-lg ${!userStickers[item.id] ? 'text-green-600' : 'text-red-600'}">#${item.id}</p>
-                        <p class="text-xs text-gray-600 font-bold bg-gray-100 rounded w-full px-1 py-1 mt-1 truncate" title="${nomPropietari}">De: ${nomPropietari}</p>
-                        <p class="text-xs text-gray-500 mt-1 font-bold">Repetits: ${item.qty}</p>`;
+                        <img src="${BASE_IMAGE_URL}${String(item.id).padStart(3, '0')}.jpg" class="w-full h-40 object-contain mb-2 relative z-[1]">
+                        <p class="font-bold text-lg ${!userStickers[item.id] ? 'text-green-600' : 'text-red-600'} z-[1]">#${item.id}</p>
+                        <p class="text-xs text-gray-600 font-bold bg-gray-100 rounded w-full px-1 py-1 mt-1 truncate z-[1]" title="${nomPropietari}">De: ${nomPropietari}</p>
+                        <p class="text-xs text-gray-500 mt-1 font-bold z-[1]">Repetits: ${item.qty}</p>`;
                     
+                    card.addEventListener('mousemove', (e) => animarCromoAmbRato(e, card));
+                    card.addEventListener('mouseleave', () => { resetAnimacioCromo(card); card.classList.add('is-glaring'); });
+
                     card.onclick = () => {
                         const tincAquestCromo = (userStickers[item.id] || 0) > 0;
                         if (tincAquestCromo) {
@@ -1388,9 +1554,9 @@
                     teOpcions = true;
                     const noTinc = !stickersPropi[id];
                     repetitsHtml += `
-                        <div class="border rounded p-1 cursor-pointer hover:bg-indigo-50 transition-colors" onclick="intentarAcceptar('${tradePendent.id}', ${id}, '${sollicitant}', '${currentUserId}', ${cromoId})">
-                            <img src="${BASE_IMAGE_URL}${String(id).padStart(3, '0')}.jpg" class="w-full h-auto">
-                            <p class="text-xs font-bold mt-1 ${noTinc ? 'text-green-600' : 'text-gray-700'}">#${id}</p>
+                        <div class="border rounded p-1 cursor-pointer hover:bg-indigo-50 transition-colors cromo-filled is-glaring" onclick="intentarAcceptar('${tradePendent.id}', ${id}, '${sollicitant}', '${currentUserId}', ${cromoId})">
+                            <img src="${BASE_IMAGE_URL}${String(id).padStart(3, '0')}.jpg" class="w-full h-auto relative z-[1]">
+                            <p class="text-xs font-bold mt-1 relative z-[1] ${noTinc ? 'text-green-600' : 'text-gray-700'}">#${id}</p>
                         </div>`;
                 }
             }
@@ -1413,6 +1579,12 @@
                     <button onclick="tancarPendingModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-bold shadow hover:bg-gray-300 transition-colors">Tancar finestra</button>
                 </div>`;
             document.getElementById('pending-trade-modal').style.display = 'flex';
+            
+            // Re-apply hover effects in modal
+             document.querySelectorAll('#pending-modal-content .cromo-filled').forEach(card => {
+                card.addEventListener('mousemove', (e) => animarCromoAmbRato(e, card));
+                card.addEventListener('mouseleave', () => { resetAnimacioCromo(card); card.classList.add('is-glaring'); });
+            });
         }
 
         async function intentarAcceptar(tradeId, cromoOferit, sollicitantId, propietariId, cromoSollicitat) {
