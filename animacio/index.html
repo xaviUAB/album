@@ -1430,11 +1430,25 @@
             }
         };
         
-        document.getElementById('btn-back-album').onclick = () => { 
-            document.getElementById('market-view').classList.add('hidden'); 
-            document.getElementById('album-view').style.display = 'flex'; 
-            iniciarAlbum(allUsersData[currentUserId] || {}); 
-            actualitzarProgresGlobal();
+        document.getElementById('btn-back-album').onclick = async () => { 
+            document.getElementById('global-loader-text').innerText = "Actualitzant l'àlbum...";
+            document.getElementById('global-loader').style.display = 'flex';
+            
+            try {
+                await recarregarDades(); // Sincronitzem amb Google Sheets abans de tornar
+            } catch (err) {
+                console.warn("Error en sincronitzar l'àlbum:", err);
+            } finally {
+                document.getElementById('market-view').classList.add('hidden'); 
+                document.getElementById('album-view').style.display = 'flex'; 
+                iniciarAlbum(allUsersData[currentUserId] || {}); 
+                actualitzarProgresGlobal();
+                
+                // Amaguem la pantalla de càrrega amb un lleuger retard perquè l'àlbum es munti suaument
+                setTimeout(() => {
+                    document.getElementById('global-loader').style.display = 'none';
+                }, 400);
+            }
         };
 
         function obrirModalUI(id) { document.getElementById(id).style.display = 'flex'; }
