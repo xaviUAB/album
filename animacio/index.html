@@ -203,7 +203,7 @@
     <div id="admin-config-modal" class="modal">
         <div class="bg-white p-8 rounded-2xl w-full max-w-3xl m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <h2 class="text-2xl font-bold mb-4 text-gray-800">Configuració de les Seccions</h2>
-            <p class="text-sm text-gray-600 mb-6 border-b pb-4">Defineix l'ordre i el prefix de les seccions. El prefix s'usarà com a nom de fitxer (ex: P001.png). L'ordre visual no altera la col·lecció de l'usuari sempre i quan es mantingui el Prefix.</p>
+            <p class="text-sm text-gray-600 mb-6 border-b pb-4">Defineix l'ordre i el prefix de les seccions. El prefix s'usarà com a nom de fitxer (ex: P001.png). L'ordre visual no altera la col·lecció dels perfils sempre i quan es mantingui el Prefix.</p>
             
             <div id="config-sections-list" class="space-y-3 mb-6"></div>
             
@@ -380,7 +380,9 @@
     <script>
         const BASE_IMAGE_URL = "https://xaviuab.github.io/album/animacio/cromos/";
         const BASE_ASSETS_URL = "https://xaviuab.github.io/album/animacio/imatges/";
-        const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1HFUal7-fWHCIFZgdcMjgYVn0-g6CIskbnoo1c2nae_k/gviz/tq?tqx=out:csv';
+        
+        // Assegurem que enllaça a la pestanya 'Col·lecció' de forma estricta i forçant els encapçalaments
+        const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1HFUal7-fWHCIFZgdcMjgYVn0-g6CIskbnoo1c2nae_k/gviz/tq?tqx=out:csv&sheet=Col%C2%B7lecci%C3%B3&headers=1';
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxC-u56i9cHUTaxd4ISRzb2DFMaaUDDnSR98eK8iAx3AziqyvbJq7M8W8uaB4IT1bBC/exec';
 
         // --- Mapeig d'Imatges Alfanumèriques ---
@@ -534,16 +536,42 @@
 
         function parseAllCSVData(csvText) {
             const lines = csvText.split('\n');
-            const headers = lines[0].split(',').map(c => c.replace(/(^"|"$)/g, '').trim());
+            if(lines.length === 0) return {};
+            
+            // Un parser senzill però molt sòlid que esquiva les comes escrites dins dels noms o títols
+            const parseLine = (line) => {
+                let result = [];
+                let inQuotes = false;
+                let current = "";
+                for(let i=0; i<line.length; i++) {
+                    let char = line[i];
+                    if(char === '"') { 
+                        inQuotes = !inQuotes; 
+                    } else if(char === ',' && !inQuotes) { 
+                        result.push(current.trim()); 
+                        current = ""; 
+                    } else { 
+                        current += char; 
+                    }
+                }
+                result.push(current.trim());
+                return result.map(c => c.replace(/(^"|"$)/g, '').trim());
+            };
+
+            // Convertim a majúscules perquè PR001 coincideixi sempre
+            const headers = parseLine(lines[0]).map(h => h.toUpperCase());
             const db = {};
+            
             for (let i = 1; i < lines.length; i++) {
-                const row = lines[i].split(',').map(c => c.replace(/(^"|"$)/g, '').trim());
+                if (!lines[i].trim()) continue;
+                const row = parseLine(lines[i]);
                 if (!row[0]) continue;
+                
                 const stickers = {};
-                // NOU: Llegim les capçaleres per saber l'ID del cromo
                 for (let j = 2; j < row.length; j++) { 
-                    if (parseInt(row[j]) > 0 && headers[j]) {
-                        stickers[headers[j]] = parseInt(row[j]); 
+                    const num = parseInt(row[j]);
+                    if (num > 0 && headers[j]) {
+                        stickers[headers[j]] = num; 
                     }
                 }
                 db[row[0]] = stickers;
@@ -616,7 +644,7 @@
             for (let s = 0; s < appConfig.seccions.length; s++) {
                 const seccio = appConfig.seccions[s];
                 const quantitat = parseInt(seccio.quantitat) || 0;
-                const prefix = seccio.prefix || `S${s+1}`; // Si no hi és, fa servir S1, S2...
+                const prefix = seccio.prefix || `S${s+1}`; 
                 if (quantitat <= 0) continue;
                 
                 window.sectionStartPages.push(countPages);
@@ -1511,25 +1539,34 @@
             const grid = document.getElementById('admin-collection-grid');
             grid.innerHTML = '';
             
-            const validIds = getAllCromoIds();
-            totalCromosAlbum = validIds.length;
-            
+            totalCromosAlbum = getAllCromoIds().length;
             let unicsAdmin = 0;
 
-            validIds.forEach(idStr => {
-                const qty = userStickers[idStr] || 0;
-                if(qty > 0) unicsAdmin++;
-                
-                const bgClass = qty === 0 ? 'bg-red-100' : 'bg-green-100';
-                grid.innerHTML += `
-                    <div id="admin-cromo-container-${idStr}" class="border rounded-lg p-2 text-center ${bgClass} flex flex-col items-center justify-center transition-colors">
-                        <span class="text-[10px] font-bold text-gray-600 mb-1">${idStr}</span>
-                        <input type="number" min="0" max="99" id="admin-cromo-${idStr}" value="${qty}" oninput="actualitzarColorAdmin('${idStr}')" class="w-full text-center border border-gray-300 p-1 rounded font-bold text-indigo-700 outline-none focus:ring-1 focus:ring-indigo-500 bg-white/90">
-                    </div>
-                `;
+            // Mostrar cromos agrupats per secció
+            appConfig.seccions.forEach((sec, idx) => {
+                const prefix = sec.prefix || `S${idx+1}`;
+                const quantitat = parseInt(sec.quantitat) || 0;
+                if(quantitat <= 0) return;
+
+                // Títol de la secció abans de cada grup
+                grid.innerHTML += `<div class="col-span-5 md:col-span-10 lg:col-span-10 mt-6 mb-2 border-b border-indigo-200"><h4 class="text-lg font-bold text-indigo-800">${sec.titol}</h4></div>`;
+
+                for(let i=1; i<=quantitat; i++) {
+                    let idStr = prefix + String(i).padStart(3, '0');
+                    const qty = userStickers[idStr] || 0;
+                    if(qty > 0) unicsAdmin++;
+                    
+                    const bgClass = qty === 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-300';
+                    grid.innerHTML += `
+                        <div id="admin-cromo-container-${idStr}" class="border rounded-lg p-2 text-center ${bgClass} flex flex-col items-center justify-center transition-colors shadow-sm">
+                            <span class="text-[10px] font-bold text-gray-600 mb-1">${idStr}</span>
+                            <input type="number" min="0" max="99" id="admin-cromo-${idStr}" value="${qty}" oninput="actualitzarColorAdmin('${idStr}')" class="w-full text-center border border-gray-300 p-1 rounded font-bold text-indigo-700 outline-none focus:ring-1 focus:ring-indigo-500 bg-white shadow-inner">
+                        </div>
+                    `;
+                }
             });
-            collectionDiv.classList.remove('hidden');
             
+            collectionDiv.classList.remove('hidden');
             actualitzarProgressAdminVisual(unicsAdmin, totalCromosAlbum);
         }
 
@@ -1549,11 +1586,11 @@
             const val = parseInt(document.getElementById(`admin-cromo-${idStr}`).value) || 0;
             const container = document.getElementById(`admin-cromo-container-${idStr}`);
             if (val === 0) {
-                container.classList.remove('bg-green-100');
-                container.classList.add('bg-red-100');
+                container.classList.remove('bg-green-50', 'border-green-300');
+                container.classList.add('bg-red-50', 'border-red-200');
             } else {
-                container.classList.remove('bg-red-100');
-                container.classList.add('bg-green-100');
+                container.classList.remove('bg-red-50', 'border-red-200');
+                container.classList.add('bg-green-50', 'border-green-300');
             }
             
             let nousUnics = 0;
@@ -1757,7 +1794,6 @@
 
             sincronitzarInputsSeccions();
             
-            // Verificació d'errors: assegurem que posin un prefix de 2 lletres
             for(let i=0; i<appConfig.seccions.length; i++) {
                 if(!appConfig.seccions[i].prefix || appConfig.seccions[i].prefix.length !== 2) {
                     mostrarInfoModal("Error: Totes les seccions han de tenir un Prefix exactament de 2 caràcters (ex: PR, AN, etc.)");
