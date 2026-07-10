@@ -22,7 +22,7 @@
         .cromo-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 16px; flex-grow: 1; margin-top: 10px; }
         .cromo-slot { aspect-ratio: 3/4; position: relative; border-radius: 6px; cursor: pointer; }
         
-        /* Efecte Hologràfic / Foil / Glare (NOMÉS REACCIONA EN HOVER O MOUSEMOVE) */
+        /* Efecte Hologràfic / Foil / Glare */
         .cromo-filled { 
             background-color: white; 
             border: 3px solid white; 
@@ -58,11 +58,10 @@
         }
 
         .cromo-empty { background-color: #e5e7eb; border: 2px dashed #9ca3af; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: default; }
-        .cromo-empty img { filter: grayscale(100%); opacity: 0.5; width: 100%; height: 100%; object-fit: cover; }
+        .cromo-empty img { filter: grayscale(100%); opacity: 0.5; width: 100%; height: 100%; object-fit: contain; }
         
         #modal-overlay, #confirm-overlay, #pending-trade-modal, #trade-duplicate-confirm-modal, #info-modal { display: none; position: fixed; inset: 0; z-index: 9999; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         
-        /* Pantalla de càrrega global */
         #global-loader {
             position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -118,9 +117,7 @@
         <div class="w-full max-w-3xl m-4 text-center">
             <h2 class="text-3xl font-bold mb-2 text-white drop-shadow-md">Nous cromos aconseguits</h2>
             <p class="text-indigo-200 mb-8 text-lg">Clica a cadascun per afegir-lo a la col·lecció!</p>
-            <div id="packet-cards-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 px-4">
-                <!-- Es generen els cromos via JS -->
-            </div>
+            <div id="packet-cards-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 px-4"></div>
             <button id="btn-close-packet" onclick="tancarSobre()" class="hidden mx-auto bg-white text-indigo-900 px-8 py-3 rounded-full font-bold text-lg hover:bg-gray-100 transition shadow-xl border-2 border-indigo-200">Guardar i anar a l'àlbum</button>
         </div>
     </div>
@@ -196,9 +193,7 @@
 
             <div id="admin-collection-area" class="hidden">
                 <h3 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Gestió de la Col·lecció</h3>
-                <div id="admin-collection-grid" class="grid grid-cols-5 md:grid-cols-10 lg:grid-cols-10 gap-2 mb-6 max-h-96 overflow-y-auto p-2 border border-gray-100 rounded bg-gray-50">
-                    <!-- Es generarà via JS -->
-                </div>
+                <div id="admin-collection-grid" class="grid grid-cols-5 md:grid-cols-10 lg:grid-cols-10 gap-2 mb-6 max-h-96 overflow-y-auto p-2 border border-gray-100 rounded bg-gray-50"></div>
                 <button onclick="guardarColleccioAdmin()" id="btn-save-admin" class="w-full bg-emerald-600 text-white p-3 rounded-lg font-bold hover:bg-emerald-700 shadow transition">Guardar tots els canvis</button>
             </div>
         </div>
@@ -206,13 +201,11 @@
 
     <!-- MODAL CONFIGURACIÓ SECCIONS ADMIN -->
     <div id="admin-config-modal" class="modal">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-2xl m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-3xl m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <h2 class="text-2xl font-bold mb-4 text-gray-800">Configuració de les Seccions</h2>
-            <p class="text-sm text-gray-600 mb-6 border-b pb-4">Defineix els blocs de l'àlbum. L'ordre aquí determinarà com apareixen al llibre. La suma total determina el límit de cromos de tota la col·lecció.</p>
+            <p class="text-sm text-gray-600 mb-6 border-b pb-4">Defineix l'ordre i el prefix de les seccions. El prefix s'usarà com a nom de fitxer (ex: P001.png). L'ordre visual no altera la col·lecció de l'usuari sempre i quan es mantingui el Prefix.</p>
             
-            <div id="config-sections-list" class="space-y-3 mb-6">
-                <!-- Seccions via JS -->
-            </div>
+            <div id="config-sections-list" class="space-y-3 mb-6"></div>
             
             <button onclick="afegirNovaSeccioConfig()" class="w-full border-2 border-dashed border-indigo-300 text-indigo-700 py-3 rounded-lg font-bold mb-6 hover:bg-indigo-50 transition">+ Afegir nova secció</button>
             
@@ -284,9 +277,7 @@
             </button>
             <h2 class="text-3xl font-bold mb-2 text-center text-amber-600 flex items-center justify-center gap-2">🏆 Rànquing Global</h2>
             <p class="text-center text-gray-500 mb-6 text-sm">Els perfils amb les col·leccions més completes.</p>
-            <div id="leaderboard-list" class="space-y-2">
-                <!-- Generat via JS -->
-            </div>
+            <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </div>
 
@@ -315,14 +306,13 @@
 
         <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-xs font-bold text-gray-600 mb-1">Cercar per Número</label>
-                <input type="number" id="market-search" placeholder="Ex: 42" class="w-full p-2 border rounded outline-none focus:ring-2 focus:ring-emerald-500" oninput="aplicarFiltresMercat()">
+                <label class="block text-xs font-bold text-gray-600 mb-1">Cercar per Identificador</label>
+                <input type="text" id="market-search" placeholder="Ex: P001" class="w-full p-2 border rounded outline-none focus:ring-2 focus:ring-emerald-500" oninput="aplicarFiltresMercat()">
             </div>
             <div class="flex-1 min-w-[200px]">
                 <label class="block text-xs font-bold text-gray-600 mb-1">Filtrar per Secció</label>
                 <select id="market-filter-section" class="w-full p-2 border rounded outline-none focus:ring-2 focus:ring-emerald-500" onchange="aplicarFiltresMercat()">
                     <option value="all">Totes les seccions</option>
-                    <!-- S'omple per JS segons config -->
                 </select>
             </div>
             <div class="flex-1 min-w-[200px] flex items-center h-[42px] px-2 bg-gray-50 rounded border border-gray-200">
@@ -342,12 +332,12 @@
 
     <!-- MODAL IMATGE AMPLIADA AMB EFECTE FOIL -->
     <div id="modal-overlay" class="modal" onclick="tancarImatgeModal()">
-        <div id="modal-card-container" class="cromo-filled relative rounded-2xl w-auto h-[75vh] md:h-[85vh] aspect-[3/4] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-8 border-white transform-gpu transition-transform duration-200" 
+        <div id="modal-card-container" class="cromo-filled relative rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-8 border-white transform-gpu transition-transform duration-200" 
              onclick="event.stopPropagation()"
              onmousemove="animarCromoAmbRato(event, this)"
              onmouseleave="resetAnimacioCromo(this)">
             <div class="glare-overlay"></div>
-            <img id="modal-img" class="w-full h-full object-cover rounded-lg relative z-[1]">
+            <img id="modal-img" class="block max-w-[90vw] max-h-[75vh] md:max-h-[85vh] w-auto h-auto object-contain rounded-lg relative z-[1]">
         </div>
     </div>
     
@@ -361,11 +351,10 @@
         </div>
     </div>
 
-    <!-- Nova Modal Confirmació de Duplicats en Intercanvis -->
     <div id="trade-duplicate-confirm-modal" class="modal">
         <div class="bg-white p-6 rounded-lg text-center max-w-sm shadow-2xl border-t-4 border-amber-500">
             <h3 id="trade-duplicate-title" class="text-xl font-bold mb-2 text-amber-600">Avís: Ja tens aquest cromo</h3>
-            <p id="trade-duplicate-text" class="mb-6 text-gray-600 text-sm">S'està segur de voler fer l'intercanvi per aconseguir-ne una còpia addicional?</p>
+            <p id="trade-duplicate-text" class="mb-6 text-gray-600 text-sm">Estàs segur que vols fer l'intercanvi per aconseguir-ne una còpia addicional?</p>
             <div id="trade-duplicate-buttons" class="flex flex-col gap-2">
                 <button id="btn-duplicate-yes" class="w-full bg-amber-500 text-white py-3 rounded font-bold hover:bg-amber-600 transition shadow">Sí, vull aquest cromo</button>
                 <button id="btn-duplicate-other" class="w-full bg-indigo-50 text-indigo-700 py-2 rounded font-bold hover:bg-indigo-100 transition border border-indigo-200">Triar un altre cromo</button>
@@ -394,12 +383,10 @@
         const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1HFUal7-fWHCIFZgdcMjgYVn0-g6CIskbnoo1c2nae_k/gviz/tq?tqx=out:csv';
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxC-u56i9cHUTaxd4ISRzb2DFMaaUDDnSR98eK8iAx3AziqyvbJq7M8W8uaB4IT1bBC/exec';
 
-        // --- NOU: Funció centralitzada per generar HTML dels cromos suportant PNG i JPG ---
-        function getCromoImgHTML(id, cssClass = "") {
-            const idStr = String(id).padStart(3, '0');
+        // --- Mapeig d'Imatges Alfanumèriques ---
+        function getCromoImgHTML(idStr, cssClass = "") {
             const pngUrl = `${BASE_IMAGE_URL}${idStr}.png`;
             const jpgUrl = `${BASE_IMAGE_URL}${idStr}.jpg`;
-            // Intenta PNG primer; si falla, prova JPG; si també falla, l'atribut es neteja per no fer bucles.
             return `<img src="${pngUrl}" onerror="this.onerror=null; this.src='${jpgUrl}';" class="${cssClass}">`;
         }
 
@@ -418,9 +405,11 @@
         let currentPacketType = "Normal";
         let cromosAgafats = 0;
         
-        let appConfig = { seccions: [{ titol: "La Col·lecció", quantitat: 80 }] };
+        let appConfig = { seccions: [{ titol: "La Col·lecció", quantitat: 80, prefix: "S1" }] };
         let totalCromosAlbum = 80;
         let currentMarketItems = []; 
+        window.sectionStartPages = [];
+        window.currentModalCromoId = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
@@ -433,6 +422,18 @@
                 obrirModalUI('new-password-modal');
             }
         });
+
+        // -- Utilitat per llistar tots els IDs vàlids de la col·lecció en l'ordre de les seccions --
+        function getAllCromoIds() {
+            let ids = [];
+            appConfig.seccions.forEach((sec, idx) => {
+                const prefix = sec.prefix || `S${idx+1}_`;
+                for(let i=1; i<=sec.quantitat; i++) {
+                    ids.push(prefix + String(i).padStart(3, '0'));
+                }
+            });
+            return ids;
+        }
 
         /* ======== FUNCIONS GENERALS I LOGIN ======== */
         async function fentLogin() {
@@ -449,9 +450,9 @@
                     const confRes = await getJSONP(APPS_SCRIPT_URL + "?action=getSections");
                     if(confRes && confRes.sections && confRes.sections.length > 0) {
                         appConfig.seccions = confRes.sections;
-                        totalCromosAlbum = getTotalCromosConfigurats();
+                        totalCromosAlbum = getAllCromoIds().length;
                     }
-                } catch(e) { console.warn("Usant seccions per defecte. Revisa la pestanya Config de Google Sheets."); }
+                } catch(e) { console.warn("Usant seccions per defecte."); }
 
                 const usersList = await getJSONP(APPS_SCRIPT_URL + "?action=getUsers");
                 const user = usersList.find(u => String(u.id) === String(id) || String(u.niu) === String(id));
@@ -487,7 +488,7 @@
                 const confRes = await getJSONP(APPS_SCRIPT_URL + "?action=getSections");
                 if(confRes && confRes.sections && confRes.sections.length > 0) {
                     appConfig.seccions = confRes.sections;
-                    totalCromosAlbum = getTotalCromosConfigurats();
+                    totalCromosAlbum = getAllCromoIds().length;
                 }
                 const resUsers = await getJSONP(APPS_SCRIPT_URL + "?action=getPublicUsers");
                 if (Array.isArray(resUsers)) publicUsersList = resUsers;
@@ -533,21 +534,21 @@
 
         function parseAllCSVData(csvText) {
             const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(c => c.replace(/(^"|"$)/g, '').trim());
             const db = {};
             for (let i = 1; i < lines.length; i++) {
                 const row = lines[i].split(',').map(c => c.replace(/(^"|"$)/g, '').trim());
                 if (!row[0]) continue;
                 const stickers = {};
-                for (let j = 1; j < row.length; j++) { 
-                    if (parseInt(row[j]) > 0) stickers[j] = parseInt(row[j]); 
+                // NOU: Llegim les capçaleres per saber l'ID del cromo
+                for (let j = 2; j < row.length; j++) { 
+                    if (parseInt(row[j]) > 0 && headers[j]) {
+                        stickers[headers[j]] = parseInt(row[j]); 
+                    }
                 }
                 db[row[0]] = stickers;
             }
             return db;
-        }
-        
-        function getTotalCromosConfigurats() {
-            return appConfig.seccions.reduce((acc, sec) => acc + parseInt(sec.quantitat || 0), 0);
         }
 
         // --- ÀLBUM i PROGRESSIÓ ---
@@ -575,8 +576,10 @@
         }
 
         function generarPagines(userStickers) {
-            totalCromosAlbum = getTotalCromosConfigurats();
-            let unicsConseguits = Object.keys(userStickers).filter(k => userStickers[k] > 0 && parseInt(k) <= totalCromosAlbum).length;
+            const validIds = getAllCromoIds();
+            totalCromosAlbum = validIds.length;
+            
+            let unicsConseguits = Object.keys(userStickers).filter(k => userStickers[k] > 0 && validIds.includes(k)).length;
             let percentage = totalCromosAlbum > 0 ? Math.round((unicsConseguits / totalCromosAlbum) * 100) : 0;
 
             let countPages = 1; 
@@ -608,25 +611,29 @@
                 </div>`;
             countPages++;
 
-            let currentIdGlobal = 1;
+            window.sectionStartPages = []; 
 
             for (let s = 0; s < appConfig.seccions.length; s++) {
                 const seccio = appConfig.seccions[s];
                 const quantitat = parseInt(seccio.quantitat) || 0;
+                const prefix = seccio.prefix || `S${s+1}`; // Si no hi és, fa servir S1, S2...
                 if (quantitat <= 0) continue;
                 
+                window.sectionStartPages.push(countPages);
+
                 html += `
                     <div class="page page-cover bg-indigo-700 relative">
-                        <img src="${BASE_ASSETS_URL}seccio${s + 1}.png" onload="this.parentElement.querySelectorAll('.hide-on-img').forEach(el => el.style.display='none')" onerror="this.onerror=null; this.src='${BASE_ASSETS_URL}seccio${s + 1}.jpg'; this.onerror=function(){this.remove();};" class="absolute inset-0 w-full h-full object-cover z-0">
+                        <img src="${BASE_ASSETS_URL}${prefix}.png" onload="this.parentElement.querySelectorAll('.hide-on-img').forEach(el => el.style.display='none')" onerror="this.onerror=null; this.src='${BASE_ASSETS_URL}${prefix}.jpg'; this.onerror=function(){this.remove();};" class="absolute inset-0 w-full h-full object-cover z-0">
                         <div class="hide-on-img absolute inset-0 bg-indigo-900/60 z-[5]"></div>
                         <div class="hide-on-img page-content relative z-10 flex flex-col items-center justify-center text-center text-white h-full">
                             <h2 class="text-3xl font-extrabold mb-4 drop-shadow-md">${seccio.titol}</h2>
-                            <p class="text-indigo-100 font-bold px-4 py-1 bg-black/40 rounded-full border border-white/20 shadow-sm">Cromos ${currentIdGlobal} a ${currentIdGlobal + quantitat - 1}</p>
+                            <p class="text-indigo-100 font-bold px-4 py-1 bg-black/40 rounded-full border border-white/20 shadow-sm">${quantitat} Cromos</p>
                         </div>
                     </div>`;
                 countPages++;
 
                 const pagesNeeded = Math.ceil(quantitat / 4);
+                let currentIdLocal = 1;
                 let cromosPendentsSeccio = quantitat;
 
                 for (let p = 0; p < pagesNeeded; p++) {
@@ -634,25 +641,27 @@
                     
                     for (let i = 1; i <= 4; i++) {
                         if (cromosPendentsSeccio > 0) {
-                            let id = currentIdGlobal;
-                            let qty = userStickers[id] || 0;
+                            let idStr = prefix + String(currentIdLocal).padStart(3, '0');
+                            let qty = userStickers[idStr] || 0;
                             
                             if (qty > 0) {
                                 html += `<div class="cromo-slot cromo-filled shadow" 
                                             onmousemove="animarCromoAmbRato(event, this)"
-                                            onmouseleave="resetAnimacioCromo(this)"
-                                            onmousedown="event.stopPropagation();" 
-                                            onpointerdown="event.stopPropagation();" 
-                                            ontouchstart="event.stopPropagation();" 
-                                            onclick="obrirImatgeModal(this.querySelector('img').src, event)">
+                                            onmouseleave="resetAnimacioCromo(this)">
                                             <div class="glare-overlay"></div>
-                                            ${getCromoImgHTML(id, "w-full h-full object-cover relative z-[1]")}
+                                            ${getCromoImgHTML(idStr, "w-full h-full object-contain relative z-[1] p-1")}
                                             ${qty > 1 ? `<span class="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow z-[10] border border-red-800">${qty}</span>` : ''}
+                                            <div class="absolute inset-0 m-auto w-1/2 h-1/2 z-[30] cursor-pointer"
+                                                 onmousedown="event.stopPropagation();" 
+                                                 onpointerdown="event.stopPropagation();" 
+                                                 ontouchstart="event.stopPropagation();" 
+                                                 onclick="obrirImatgeModal(this.parentElement.querySelector('img').src, event, '${idStr}')">
+                                            </div>
                                          </div>`;
                             } else {
-                                html += `<div class="cromo-slot cromo-empty">${getCromoImgHTML(id)}<span class="absolute font-bold text-gray-400 bg-white/80 px-2 rounded">#${id}</span></div>`;
+                                html += `<div class="cromo-slot cromo-empty">${getCromoImgHTML(idStr, "w-full h-full object-contain p-1 opacity-50 grayscale")}<span class="absolute font-bold text-gray-800 bg-white/80 px-2 rounded z-[2] shadow-sm">${idStr}</span></div>`;
                             }
-                            currentIdGlobal++;
+                            currentIdLocal++;
                             cromosPendentsSeccio--;
                         } else {
                             html += `<div></div>`; 
@@ -663,14 +672,19 @@
                 }
             }
             
-            if (countPages % 2 !== 0) {
-                html += `
-                    <div class="page page-cover bg-indigo-900">
-                        <div class="page-content flex flex-col items-center justify-center text-center text-white h-full opacity-50">
-                            <p class="font-bold">Fi de l'Àlbum</p>
-                        </div>
-                    </div>`;
+            if (countPages % 2 === 0) {
+                html += `<div class="page bg-indigo-50"><div class="page-content"></div></div>`;
+                countPages++;
             }
+            
+            html += `
+                <div class="page page-cover bg-indigo-900 relative">
+                    <img src="${BASE_ASSETS_URL}contraportada.png" onload="this.parentElement.querySelectorAll('.hide-on-img').forEach(el => el.style.display='none')" onerror="this.onerror=null; this.src='${BASE_ASSETS_URL}contraportada.jpg'; this.onerror=function(){this.remove();};" class="absolute inset-0 w-full h-full object-cover z-0">
+                    <div class="hide-on-img absolute inset-0 bg-indigo-900/60 z-[5]"></div>
+                    <div class="hide-on-img page-content flex flex-col items-center justify-center text-center text-white h-full relative z-10 opacity-50">
+                        <p class="font-bold">Fi de l'Àlbum</p>
+                    </div>
+                </div>`;
             
             return html;
         }
@@ -678,8 +692,9 @@
         function actualitzarProgresGlobal() {
             if (!currentUserId || !allUsersData[currentUserId]) return;
             const userStickers = allUsersData[currentUserId];
-            totalCromosAlbum = getTotalCromosConfigurats();
-            let unicsConseguits = Object.keys(userStickers).filter(k => userStickers[k] > 0 && parseInt(k) <= totalCromosAlbum).length;
+            const validIds = getAllCromoIds();
+            totalCromosAlbum = validIds.length;
+            let unicsConseguits = Object.keys(userStickers).filter(k => userStickers[k] > 0 && validIds.includes(k)).length;
             let percentage = totalCromosAlbum > 0 ? Math.round((unicsConseguits / totalCromosAlbum) * 100) : 0;
             
             document.getElementById('progress-text-global').innerText = `Col·lecció: ${unicsConseguits} / ${totalCromosAlbum}`;
@@ -699,12 +714,13 @@
             }
             if (!Array.isArray(publicUsersList)) publicUsersList = [];
 
-            totalCromosAlbum = getTotalCromosConfigurats();
+            const validIds = getAllCromoIds();
+            totalCromosAlbum = validIds.length;
             list.innerHTML = '';
             
             let ranking = [];
             for (const [uid, stickers] of Object.entries(allUsersData)) {
-                let unics = Object.keys(stickers).filter(k => stickers[k] > 0 && parseInt(k) <= totalCromosAlbum).length;
+                let unics = Object.keys(stickers).filter(k => stickers[k] > 0 && validIds.includes(k)).length;
                 let userObj = { uid: uid, count: unics, nom: uid };
                 ranking.push(userObj);
             }
@@ -783,6 +799,77 @@
             }, 400);
         }
 
+        window.addEventListener('keydown', (e) => {
+            const modalOverlay = document.getElementById('modal-overlay');
+            const isModalOpen = modalOverlay.style.display === 'flex';
+            const albumView = document.getElementById('album-view');
+            const isAlbumView = albumView.style.display !== 'none' && albumView.style.display !== '';
+
+            if (isModalOpen && window.currentModalCromoId) {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    const userStickers = allUsersData[currentUserId] || {};
+                    const validIds = getAllCromoIds();
+                    
+                    const ownedIds = validIds.filter(id => userStickers[id] > 0);
+                    
+                    if (ownedIds.length > 0) {
+                        let currentIndex = ownedIds.indexOf(window.currentModalCromoId);
+                        if (currentIndex === -1) return; 
+                        
+                        if (e.key === 'ArrowRight') {
+                            currentIndex = (currentIndex + 1) % ownedIds.length;
+                        } else if (e.key === 'ArrowLeft') {
+                            currentIndex = (currentIndex - 1 + ownedIds.length) % ownedIds.length;
+                        }
+                        
+                        const newId = ownedIds[currentIndex];
+                        window.currentModalCromoId = newId;
+                        
+                        const imgEl = document.getElementById('modal-img');
+                        const pngUrl = `${BASE_IMAGE_URL}${newId}.png`;
+                        const jpgUrl = `${BASE_IMAGE_URL}${newId}.jpg`;
+                        
+                        imgEl.src = pngUrl;
+                        imgEl.onerror = () => {
+                            imgEl.onerror = null;
+                            imgEl.src = jpgUrl;
+                        };
+                        
+                        const container = document.getElementById('modal-card-container');
+                        resetAnimacioCromo(container);
+                    }
+                }
+                return; 
+            }
+
+            if (isAlbumView && !isModalOpen && pageFlipInstance) {
+                if (e.key === 'ArrowRight') {
+                    pageFlipInstance.flipNext();
+                } else if (e.key === 'ArrowLeft') {
+                    pageFlipInstance.flipPrev();
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault(); 
+                    const current = pageFlipInstance.getCurrentPageIndex();
+                    const isLandscape = pageFlipInstance.getOrientation() === 'landscape';
+                    const maxVisible = isLandscape ? current + 1 : current; 
+                    
+                    const nextSectionPage = window.sectionStartPages.find(p => p > maxVisible);
+                    if (nextSectionPage !== undefined) {
+                        pageFlipInstance.flip(nextSectionPage);
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault(); 
+                    const current = pageFlipInstance.getCurrentPageIndex();
+                    const prevSectionPage = [...window.sectionStartPages].reverse().find(p => p < current);
+                    if (prevSectionPage !== undefined) {
+                        pageFlipInstance.flip(prevSectionPage);
+                    } else if (current > 0) {
+                        pageFlipInstance.flip(0); 
+                    }
+                }
+            }
+        });
+
         // --- GESTIÓ DE PERFIL ---
         async function guardarPerfil() {
             const nom = document.getElementById('reg-nom').value.trim();
@@ -860,17 +947,14 @@
                 body: JSON.stringify({ action: 'marcarSobreObert', rowIndex: pendingPacketRow })
             });
 
-            totalCromosAlbum = getTotalCromosConfigurats();
+            const validIds = getAllCromoIds();
             const cromosSobre = [];
             const userStickers = allUsersData[currentUserId] || {};
             
             let forcedNewId = null;
 
             if (currentPacketType === "Premium") {
-                const missingIds = [];
-                for(let i = 1; i <= totalCromosAlbum; i++) {
-                    if(!userStickers[i]) missingIds.push(i);
-                }
+                const missingIds = validIds.filter(id => !userStickers[id]);
                 if (missingIds.length > 0) {
                     forcedNewId = missingIds[Math.floor(Math.random() * missingIds.length)];
                     cromosSobre.push(forcedNewId);
@@ -878,7 +962,7 @@
             }
 
             while(cromosSobre.length < 4) {
-                const rand = Math.floor(Math.random() * totalCromosAlbum) + 1;
+                const rand = validIds[Math.floor(Math.random() * validIds.length)];
                 if(!cromosSobre.includes(rand)) cromosSobre.push(rand);
             }
 
@@ -887,17 +971,17 @@
             const grid = document.getElementById('packet-cards-grid');
             grid.innerHTML = '';
             
-            cromosSobre.forEach(cromoId => {
+            cromosSobre.forEach(cromoIdStr => {
                 const card = document.createElement('div');
                 card.className = "cromo-filled bg-white p-2 rounded-xl shadow-2xl cursor-pointer transform hover:scale-105 transition-all duration-300 relative aspect-[3/4] flex flex-col";
                 card.innerHTML = `
-                    <div id="cromo-cover-${cromoId}" class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-xl flex flex-col items-center justify-center z-[20] transition-opacity duration-700">
+                    <div id="cromo-cover-${cromoIdStr}" class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-xl flex flex-col items-center justify-center z-[20] transition-opacity duration-700">
                         <svg class="w-12 h-12 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         <span class="text-white font-bold tracking-widest uppercase text-xs">Obre'm</span>
                     </div>
                     <div class="glare-overlay"></div>
-                    ${getCromoImgHTML(cromoId, "w-full h-full object-cover rounded-lg relative z-[1]")}
-                    <div id="cromo-check-${cromoId}" class="absolute inset-0 bg-emerald-500/80 rounded-xl flex items-center justify-center z-[25] opacity-0 transition-opacity duration-300">
+                    ${getCromoImgHTML(cromoIdStr, "w-full h-full object-contain rounded-lg relative z-[1] p-1")}
+                    <div id="cromo-check-${cromoIdStr}" class="absolute inset-0 bg-emerald-500/80 rounded-xl flex items-center justify-center z-[25] opacity-0 transition-opacity duration-300">
                         <svg class="w-16 h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                 `;
@@ -910,19 +994,19 @@
                     if (clicked) return;
                     clicked = true;
                     
-                    document.getElementById(`cromo-cover-${cromoId}`).style.opacity = '0';
-                    document.getElementById(`cromo-cover-${cromoId}`).style.pointerEvents = 'none';
+                    document.getElementById(`cromo-cover-${cromoIdStr}`).style.opacity = '0';
+                    document.getElementById(`cromo-cover-${cromoIdStr}`).style.pointerEvents = 'none';
                     
                     if (!allUsersData[currentUserId]) allUsersData[currentUserId] = {};
-                    allUsersData[currentUserId][cromoId] = (allUsersData[currentUserId][cromoId] || 0) + 1;
+                    allUsersData[currentUserId][cromoIdStr] = (allUsersData[currentUserId][cromoIdStr] || 0) + 1;
 
                     fetch(APPS_SCRIPT_URL, {
                         method: 'POST', mode: 'no-cors',
-                        body: JSON.stringify({ action: 'addCromo', userId: currentUserId, cromoId: cromoId })
+                        body: JSON.stringify({ action: 'addCromo', userId: currentUserId, cromoId: cromoIdStr })
                     });
 
                     setTimeout(() => {
-                        document.getElementById(`cromo-check-${cromoId}`).style.opacity = '1';
+                        document.getElementById(`cromo-check-${cromoIdStr}`).style.opacity = '1';
                         comprovarTotsAgafats();
                     }, 600);
                 };
@@ -989,18 +1073,17 @@
             
             const userStickers = allUsersData[currentUserId] || {};
             currentMarketItems = [];
-            totalCromosAlbum = getTotalCromosConfigurats();
+            const validIds = getAllCromoIds();
             
             for (const [userId, stickers] of Object.entries(allUsersData)) {
                 if (userId === currentUserId) continue;
                 for (const [idStr, qty] of Object.entries(stickers)) {
-                    const id = parseInt(idStr);
-                    if (qty > 1 && id <= totalCromosAlbum) {
-                        currentMarketItems.push({ userId, id: id, qty });
+                    if (qty > 1 && validIds.includes(idStr)) {
+                        currentMarketItems.push({ userId, id: idStr, qty });
                     }
                 }
             }
-            currentMarketItems.sort((a, b) => a.id - b.id);
+            currentMarketItems.sort((a, b) => a.id.localeCompare(b.id));
 
             let trades = [];
             try {
@@ -1023,15 +1106,15 @@
 
             const perRespondre = trades.filter(t => String(t.propietari) === String(currentUserId) && String(t.estat).toLowerCase() === "pendent");
             for (const trade of perRespondre) {
-                const cromoId = parseInt(trade.cromo);
+                const cromoIdStr = trade.cromo;
                 const sollicitant = trade.sollicitant;
                 const nomSollicitant = getNomUsuari(sollicitant);
                 const card = document.createElement('div');
                 card.className = "bg-red-50 border border-red-200 p-2 rounded shadow text-center flex flex-col items-center justify-center relative cursor-pointer hover:bg-red-100 hover:scale-105 transition-all";
                 card.innerHTML = `
                     <span class="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow animate-pulse">Respon!</span>
-                    ${getCromoImgHTML(cromoId, "w-full h-40 object-contain mb-2 mt-4 rounded")}
-                    <p class="font-bold text-lg text-red-900">#${cromoId}</p>
+                    ${getCromoImgHTML(cromoIdStr, "w-full h-40 object-contain mb-2 mt-4 rounded")}
+                    <p class="font-bold text-lg text-red-900">${cromoIdStr}</p>
                     <div class="mt-2 text-xs w-full">
                         <p class="text-red-600 font-bold">Petició de:</p>
                         <p class="bg-red-100 text-red-800 rounded px-2 py-1 mt-1 truncate" title="${nomSollicitant}">${nomSollicitant}</p>
@@ -1040,13 +1123,13 @@
                 card.onclick = async () => {
                     await recarregarDades();
                     const stickersActuals = allUsersData[currentUserId] || {};
-                    if ((stickersActuals[cromoId] || 0) < 2) {
+                    if ((stickersActuals[cromoIdStr] || 0) < 2) {
                         mostrarInfoModal("No s'ha pogut fer l'intercanvi. Ja no tens aquest cromo repetit per donar-lo.");
                         fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action: "cancel·lar", tradeId: trade.id, estat: "No es pot"}) });
                         carregarMercat();
                         return;
                     }
-                    obrirModalIntercanviPendent(trade, cromoId, sollicitant, stickersActuals);
+                    obrirModalIntercanviPendent(trade, cromoIdStr, sollicitant, stickersActuals);
                 };
                 perRespondreGrid.appendChild(card);
                 perRespondreArea.classList.remove('hidden');
@@ -1069,7 +1152,7 @@
                     card.innerHTML = `
                         <span class="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow">Pendent</span>
                         ${getCromoImgHTML(req.cromo, "w-full h-40 object-contain mb-2 mt-4 rounded")}
-                        <p class="font-bold text-lg text-indigo-900">#${req.cromo}</p>
+                        <p class="font-bold text-lg text-indigo-900">${req.cromo}</p>
                         <div class="mt-2 text-xs w-full">
                             <p class="text-indigo-600 font-bold">Esperant a:</p>
                             <p class="bg-indigo-100 text-indigo-800 rounded px-2 py-1 mt-1 truncate" title="${nomPropietari}">${nomPropietari}</p>
@@ -1079,7 +1162,7 @@
             }
 
             currentMarketItems = currentMarketItems.filter(item => {
-                return !mevesPeticions.some(req => String(req.propietari) === String(item.userId) && parseInt(req.cromo) === item.id);
+                return !mevesPeticions.some(req => String(req.propietari) === String(item.userId) && String(req.cromo) === String(item.id));
             });
 
             aplicarFiltresMercat(); 
@@ -1090,7 +1173,7 @@
             const emptyMsg = document.getElementById('market-grid-empty');
             grid.innerHTML = '';
             
-            const searchValue = document.getElementById('market-search').value.trim();
+            const searchValue = document.getElementById('market-search').value.trim().toLowerCase();
             const filterSection = document.getElementById('market-filter-section').value;
             const hideOwned = document.getElementById('market-filter-missing').checked;
             
@@ -1098,21 +1181,20 @@
             let mostrats = 0;
 
             currentMarketItems.forEach(item => {
-                if (searchValue && String(item.id) !== searchValue) return;
+                if (searchValue && !item.id.toLowerCase().includes(searchValue)) return;
                 
                 const iHaveIt = userStickers[item.id] > 0;
                 if (hideOwned && iHaveIt) return;
 
                 if (filterSection !== "all") {
                     let isInSection = false;
-                    let currentIdCount = 1;
+                    let targetPrefix = "";
                     for (let s = 0; s < appConfig.seccions.length; s++) {
-                        const maxForSec = currentIdCount + parseInt(appConfig.seccions[s].quantitat) - 1;
-                        if (item.id >= currentIdCount && item.id <= maxForSec) {
-                            if (appConfig.seccions[s].titol === filterSection) isInSection = true;
+                        if (appConfig.seccions[s].titol === filterSection) {
+                            targetPrefix = appConfig.seccions[s].prefix || `S${s+1}_`;
+                            if (item.id.startsWith(targetPrefix)) isInSection = true;
                             break;
                         }
-                        currentIdCount = maxForSec + 1;
                     }
                     if (!isInSection) return;
                 }
@@ -1125,8 +1207,8 @@
                 
                 card.innerHTML = `
                     <div class="glare-overlay"></div>
-                    ${getCromoImgHTML(item.id, "w-full h-40 object-contain mb-2 rounded relative z-[1]")}
-                    <p class="font-bold text-lg relative z-[1] ${!iHaveIt ? 'text-green-600' : 'text-gray-500'}">#${item.id}</p>
+                    ${getCromoImgHTML(item.id, "w-full h-40 object-contain mb-2 rounded relative z-[1] p-1")}
+                    <p class="font-bold text-lg relative z-[1] ${!iHaveIt ? 'text-green-600' : 'text-gray-500'}">${item.id}</p>
                     <p class="text-xs text-gray-600 font-bold bg-gray-100 rounded w-full px-1 py-1 mt-1 truncate relative z-[1]" title="${nomPropietari}">De: ${nomPropietari}</p>
                     <p class="text-xs text-gray-500 mt-1 font-bold relative z-[1]">Repetits: ${item.qty}</p>
                 `;
@@ -1139,7 +1221,7 @@
                         const titleEl = document.getElementById('trade-duplicate-title');
                         const textEl = document.getElementById('trade-duplicate-text');
                         titleEl.innerText = "Avís: Aquest cromo ja el tens";
-                        textEl.innerText = "S'està segur de voler gastar un intercanvi per sol·licitar-ne una còpia addicional?";
+                        textEl.innerText = "Estàs segur que vols gastar un intercanvi per sol·licitar-ne una còpia addicional?";
                         
                         document.getElementById('btn-duplicate-yes').onclick = () => {
                             tancarModalUI('trade-duplicate-confirm-modal');
@@ -1179,26 +1261,26 @@
             }
         }
 
-        function enviarSolicitud(propietari, cromo) {
-            fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action: "sol·licitar", propietari, sollicitant: currentUserId, cromo}) });
+        function enviarSolicitud(propietari, cromoStr) {
+            fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action: "sol·licitar", propietari, sollicitant: currentUserId, cromo: cromoStr}) });
             mostrarInfoModal("S'ha enviat la petició d'intercanvi amb èxit.");
             setTimeout(actualitzarMercatManual, 1500);
         }
 
-        function obrirModalIntercanviPendent(tradePendent, cromoId, sollicitant, stickersPropi) {
+        function obrirModalIntercanviPendent(tradePendent, cromoIdStr, sollicitant, stickersPropi) {
             const stickersSollicitant = allUsersData[sollicitant] || {};
+            const validIds = getAllCromoIds();
             let repetitsHtml = '<div class="grid grid-cols-3 gap-2 mt-4 mb-4">';
             let teOpcions = false;
             
             for (const [idStr, qty] of Object.entries(stickersSollicitant)) {
-                const id = parseInt(idStr);
-                if (qty >= 2 && id <= totalCromosAlbum) {
+                if (qty >= 2 && validIds.includes(idStr)) {
                     teOpcions = true;
-                    const noTinc = !stickersPropi[id];
+                    const noTinc = !stickersPropi[idStr];
                     repetitsHtml += `
-                        <div class="border rounded p-1 cursor-pointer hover:bg-indigo-50 transition-colors relative" onclick="intentarAcceptar('${tradePendent.id}', ${id}, '${sollicitant}', '${currentUserId}', ${cromoId})">
-                            ${getCromoImgHTML(id, "w-full h-auto rounded")}
-                            <p class="text-xs font-bold mt-1 text-center ${noTinc ? 'text-green-600' : 'text-gray-500'}">#${id}</p>
+                        <div class="border rounded p-1 cursor-pointer hover:bg-indigo-50 transition-colors relative" onclick="intentarAcceptar('${tradePendent.id}', '${idStr}', '${sollicitant}', '${currentUserId}', '${cromoIdStr}')">
+                            ${getCromoImgHTML(idStr, "w-full h-auto rounded object-contain")}
+                            <p class="text-xs font-bold mt-1 text-center ${noTinc ? 'text-green-600' : 'text-gray-500'}">${idStr}</p>
                         </div>`;
                 }
             }
@@ -1211,8 +1293,8 @@
             document.getElementById('pending-modal-content').innerHTML = `
                 <p class="mb-2 text-gray-700">Hi ha una sol·licitud per a la carta:</p>
                 <div class="bg-gray-100 rounded p-2 mb-4">
-                    ${getCromoImgHTML(cromoId, "w-32 h-32 mx-auto object-contain mb-1 rounded")}
-                    <p class="font-bold text-gray-800">#${cromoId}</p>
+                    ${getCromoImgHTML(cromoIdStr, "w-32 h-32 mx-auto object-contain mb-1 rounded")}
+                    <p class="font-bold text-gray-800">${cromoIdStr}</p>
                 </div>
                 <p class="mt-2 text-sm font-bold text-gray-800 border-b pb-2">Tria un cromo repetit per rebre a canvi:</p>
                 ${repetitsHtml}
@@ -1223,9 +1305,9 @@
             document.getElementById('pending-trade-modal').style.display = 'flex';
         }
 
-        async function intentarAcceptar(tradeId, cromoOferit, sollicitantId, propietariId, cromoSollicitat) {
+        async function intentarAcceptar(tradeId, cromoOferitStr, sollicitantId, propietariId, cromoSollicitatStr) {
             await recarregarDades();
-            if ((allUsersData[sollicitantId][cromoOferit] || 0) < 2) {
+            if ((allUsersData[sollicitantId][cromoOferitStr] || 0) < 2) {
                 tancarPendingModal();
                 mostrarInfoModal("L'intercanvi ja no és possible perquè el cromo ja no està disponible.");
                 fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action: "cancel·lar", tradeId: tradeId, estat: "No es pot"}) });
@@ -1233,7 +1315,7 @@
                 return;
             }
             
-            const joElTinc = (allUsersData[propietariId][cromoOferit] || 0) > 0;
+            const joElTinc = (allUsersData[propietariId][cromoOferitStr] || 0) > 0;
             
             if (joElTinc) {
                 const titleEl = document.getElementById('trade-duplicate-title');
@@ -1243,7 +1325,7 @@
                 
                 document.getElementById('btn-duplicate-yes').onclick = () => {
                     tancarModalUI('trade-duplicate-confirm-modal');
-                    gestionarIntercanvi('acceptar', tradeId, cromoOferit, sollicitantId, propietariId, cromoSollicitat);
+                    gestionarIntercanvi('acceptar', tradeId, cromoOferitStr, sollicitantId, propietariId, cromoSollicitatStr);
                 };
                 
                 document.getElementById('btn-duplicate-other').style.display = 'block';
@@ -1255,10 +1337,10 @@
                 return;
             }
 
-            await gestionarIntercanvi('acceptar', tradeId, cromoOferit, sollicitantId, propietariId, cromoSollicitat);
+            await gestionarIntercanvi('acceptar', tradeId, cromoOferitStr, sollicitantId, propietariId, cromoSollicitatStr);
         }
 
-        async function gestionarIntercanvi(action, tradeId, cromoOferit, sollicitantId, propietariId, cromoSollicitat) {
+        async function gestionarIntercanvi(action, tradeId, cromoOferitStr, sollicitantId, propietariId, cromoSollicitatStr) {
             tancarPendingModal();
             let realAction = action === "rebutjar" ? "cancel·lar" : action;
             let estat = action === "rebutjar" ? "Rebutjat" : "Acceptat";
@@ -1267,15 +1349,15 @@
                 if (!allUsersData[propietariId]) allUsersData[propietariId] = {};
                 if (!allUsersData[sollicitantId]) allUsersData[sollicitantId] = {};
 
-                allUsersData[propietariId][cromoSollicitat] = Math.max(0, (allUsersData[propietariId][cromoSollicitat] || 0) - 1);
-                allUsersData[propietariId][cromoOferit] = (allUsersData[propietariId][cromoOferit] || 0) + 1;
+                allUsersData[propietariId][cromoSollicitatStr] = Math.max(0, (allUsersData[propietariId][cromoSollicitatStr] || 0) - 1);
+                allUsersData[propietariId][cromoOferitStr] = (allUsersData[propietariId][cromoOferitStr] || 0) + 1;
 
-                allUsersData[sollicitantId][cromoOferit] = Math.max(0, (allUsersData[sollicitantId][cromoOferit] || 0) - 1);
-                allUsersData[sollicitantId][cromoSollicitat] = (allUsersData[sollicitantId][cromoSollicitat] || 0) + 1;
+                allUsersData[sollicitantId][cromoOferitStr] = Math.max(0, (allUsersData[sollicitantId][cromoOferitStr] || 0) - 1);
+                allUsersData[sollicitantId][cromoSollicitatStr] = (allUsersData[sollicitantId][cromoSollicitatStr] || 0) + 1;
             }
 
             try {
-                fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action: realAction, tradeId, cromoOferit, sollicitantId, propietariId, cromoSollicitat, estat}) });
+                fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({action: realAction, tradeId, cromoOferit: cromoOferitStr, sollicitantId, propietariId, cromoSollicitat: cromoSollicitatStr, estat}) });
                 
                 mostrarInfoModal(action === "acceptar" ? "L'intercanvi s'ha realitzat amb èxit i el cromo s'ha afegit a la teva col·lecció!" : "S'ha rebutjat la proposta.");
                 
@@ -1334,13 +1416,15 @@
             document.getElementById('modal-overlay').style.display = 'none'; 
             const container = document.getElementById('modal-card-container');
             resetAnimacioCromo(container);
+            window.currentModalCromoId = null;
         }
         
-        function obrirImatgeModal(url, event) {
+        function obrirImatgeModal(url, event, idStr) {
             if (event) { event.stopPropagation(); }
             document.getElementById('modal-img').src = url;
             const container = document.getElementById('modal-card-container');
             resetAnimacioCromo(container);
+            window.currentModalCromoId = idStr;
             document.getElementById('modal-overlay').style.display = 'flex';
         }
 
@@ -1357,7 +1441,7 @@
                     const confRes = await getJSONP(APPS_SCRIPT_URL + "?action=getSections");
                     if(confRes && confRes.sections && confRes.sections.length > 0) {
                         appConfig.seccions = confRes.sections;
-                        totalCromosAlbum = getTotalCromosConfigurats();
+                        totalCromosAlbum = getAllCromoIds().length;
                     }
                 } catch(e) { console.warn("Usant seccions per defecte a l'admin."); }
 
@@ -1427,26 +1511,26 @@
             const grid = document.getElementById('admin-collection-grid');
             grid.innerHTML = '';
             
-            totalCromosAlbum = getTotalCromosConfigurats();
-            let limitColleccioDisplay = totalCromosAlbum > 0 ? totalCromosAlbum : 80;
+            const validIds = getAllCromoIds();
+            totalCromosAlbum = validIds.length;
             
             let unicsAdmin = 0;
 
-            for (let i = 1; i <= limitColleccioDisplay; i++) {
-                const qty = userStickers[i] || 0;
+            validIds.forEach(idStr => {
+                const qty = userStickers[idStr] || 0;
                 if(qty > 0) unicsAdmin++;
                 
                 const bgClass = qty === 0 ? 'bg-red-100' : 'bg-green-100';
                 grid.innerHTML += `
-                    <div id="admin-cromo-container-${i}" class="border rounded-lg p-2 text-center ${bgClass} flex flex-col items-center justify-center transition-colors">
-                        <span class="text-[10px] font-bold text-gray-600 mb-1">#${i}</span>
-                        <input type="number" min="0" max="99" id="admin-cromo-${i}" value="${qty}" oninput="actualitzarColorAdmin(${i}, ${limitColleccioDisplay})" class="w-full text-center border border-gray-300 p-1 rounded font-bold text-indigo-700 outline-none focus:ring-1 focus:ring-indigo-500 bg-white/90">
+                    <div id="admin-cromo-container-${idStr}" class="border rounded-lg p-2 text-center ${bgClass} flex flex-col items-center justify-center transition-colors">
+                        <span class="text-[10px] font-bold text-gray-600 mb-1">${idStr}</span>
+                        <input type="number" min="0" max="99" id="admin-cromo-${idStr}" value="${qty}" oninput="actualitzarColorAdmin('${idStr}')" class="w-full text-center border border-gray-300 p-1 rounded font-bold text-indigo-700 outline-none focus:ring-1 focus:ring-indigo-500 bg-white/90">
                     </div>
                 `;
-            }
+            });
             collectionDiv.classList.remove('hidden');
             
-            actualitzarProgressAdminVisual(unicsAdmin, limitColleccioDisplay);
+            actualitzarProgressAdminVisual(unicsAdmin, totalCromosAlbum);
         }
 
         function actualitzarProgressAdminVisual(unics, total) {
@@ -1461,9 +1545,9 @@
             else bar.classList.add('bg-orange-500');
         }
 
-        function actualitzarColorAdmin(id, total) {
-            const val = parseInt(document.getElementById(`admin-cromo-${id}`).value) || 0;
-            const container = document.getElementById(`admin-cromo-container-${id}`);
+        function actualitzarColorAdmin(idStr) {
+            const val = parseInt(document.getElementById(`admin-cromo-${idStr}`).value) || 0;
+            const container = document.getElementById(`admin-cromo-container-${idStr}`);
             if (val === 0) {
                 container.classList.remove('bg-green-100');
                 container.classList.add('bg-red-100');
@@ -1473,10 +1557,11 @@
             }
             
             let nousUnics = 0;
-            for(let i=1; i <= total; i++) {
-                if( (parseInt(document.getElementById(`admin-cromo-${i}`).value) || 0) > 0 ) nousUnics++;
-            }
-            actualitzarProgressAdminVisual(nousUnics, total);
+            const validIds = getAllCromoIds();
+            validIds.forEach(vid => {
+                if( (parseInt(document.getElementById(`admin-cromo-${vid}`).value) || 0) > 0 ) nousUnics++;
+            });
+            actualitzarProgressAdminVisual(nousUnics, validIds.length);
         }
 
         function alternarPass() {
@@ -1548,12 +1633,11 @@
             btn.innerText = "Guardant canvis...";
             btn.disabled = true;
 
-            const limit = getTotalCromosConfigurats() || 80;
+            const validIds = getAllCromoIds();
             const updates = {};
-            for (let i = 1; i <= limit; i++) {
-                const val = parseInt(document.getElementById(`admin-cromo-${i}`).value) || 0;
-                updates[i] = val;
-            }
+            validIds.forEach(idStr => {
+                updates[idStr] = parseInt(document.getElementById(`admin-cromo-${idStr}`).value) || 0;
+            });
 
             try {
                 fetch(APPS_SCRIPT_URL, {
@@ -1561,8 +1645,7 @@
                     body: JSON.stringify({
                         action: 'updateCollectionAdmin',
                         userId: currentAdminEditingId,
-                        stickers: updates,
-                        totalCromosAlbum: limit
+                        stickers: updates
                     })
                 });
                 
@@ -1579,6 +1662,50 @@
         }
 
         // -- FUNCIONS PER CONFIGURAR SECCIONS (ADMIN) --
+        let seccioArrossegadaIndex = null;
+
+        function sincronitzarInputsSeccions() {
+            for(let i=0; i<appConfig.seccions.length; i++) {
+                const titolInput = document.getElementById(`cfg-titol-${i}`);
+                const quantInput = document.getElementById(`cfg-quant-${i}`);
+                const prefixInput = document.getElementById(`cfg-prefix-${i}`);
+                if(titolInput) appConfig.seccions[i].titol = titolInput.value;
+                if(quantInput) appConfig.seccions[i].quantitat = parseInt(quantInput.value) || 0;
+                if(prefixInput) appConfig.seccions[i].prefix = prefixInput.value.trim().toUpperCase().substring(0, 2);
+            }
+        }
+
+        function iniciarArrossegament(event, index) {
+            sincronitzarInputsSeccions(); 
+            seccioArrossegadaIndex = index;
+            event.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => event.target.classList.add('opacity-50', 'scale-95'), 0);
+        }
+
+        function permetreArrossegament(event) {
+            event.preventDefault();
+            const element = event.target.closest('.draggable-section');
+            if(element) element.classList.add('bg-indigo-50', 'border-indigo-300');
+        }
+
+        function sortirArrossegament(event) {
+            const element = event.target.closest('.draggable-section');
+            if(element) element.classList.remove('bg-indigo-50', 'border-indigo-300');
+        }
+
+        function finalitzarArrossegament(event, indexDesti) {
+            event.preventDefault();
+            const element = event.target.closest('.draggable-section');
+            if(element) element.classList.remove('bg-indigo-50', 'border-indigo-300', 'opacity-50', 'scale-95');
+            
+            if (seccioArrossegadaIndex !== null && seccioArrossegadaIndex !== indexDesti) {
+                const seccioMoguda = appConfig.seccions.splice(seccioArrossegadaIndex, 1)[0];
+                appConfig.seccions.splice(indexDesti, 0, seccioMoguda);
+                dibuixarLlistaConfigSeccions();
+            }
+            seccioArrossegadaIndex = null;
+        }
+
         function obrirConfiguracioSeccions() {
             dibuixarLlistaConfigSeccions();
             obrirModalUI('admin-config-modal');
@@ -1590,10 +1717,20 @@
             
             appConfig.seccions.forEach((sec, idx) => {
                 list.innerHTML += `
-                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200">
+                    <div class="draggable-section flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 cursor-move hover:bg-gray-100 transition transform duration-150"
+                         draggable="true" 
+                         ondragstart="iniciarArrossegament(event, ${idx})" 
+                         ondragover="permetreArrossegament(event)" 
+                         ondragleave="sortirArrossegament(event)"
+                         ondrop="finalitzarArrossegament(event, ${idx})"
+                         ondragend="this.classList.remove('opacity-50', 'scale-95')">
+                        <div class="text-gray-400 cursor-move px-1" title="Arrossega per moure">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5h14a1 1 0 110 2H3a1 1 0 110-2zm0 4h14a1 1 0 110 2H3a1 1 0 110-2zm0 4h14a1 1 0 110 2H3a1 1 0 110-2z" clip-rule="evenodd" /></svg>
+                        </div>
                         <span class="font-bold text-gray-400 w-6 text-center">${idx + 1}</span>
-                        <input type="text" id="cfg-titol-${idx}" value="${sec.titol}" placeholder="Nom Secció" class="flex-1 p-2 border rounded outline-none focus:ring-1 focus:ring-indigo-500">
-                        <input type="number" id="cfg-quant-${idx}" value="${sec.quantitat}" placeholder="Qtt." class="w-20 p-2 border rounded outline-none text-center focus:ring-1 focus:ring-indigo-500">
+                        <input type="text" id="cfg-titol-${idx}" value="${sec.titol}" placeholder="Nom Secció" class="flex-1 p-2 border rounded outline-none focus:ring-1 focus:ring-indigo-500" onchange="sincronitzarInputsSeccions()">
+                        <input type="text" id="cfg-prefix-${idx}" value="${sec.prefix || ''}" maxlength="2" placeholder="Ex: PR" class="w-16 p-2 border rounded outline-none text-center focus:ring-1 focus:ring-indigo-500 uppercase" style="text-transform: uppercase;" title="Prefix (Ex: PR)" onchange="sincronitzarInputsSeccions()">
+                        <input type="number" id="cfg-quant-${idx}" value="${sec.quantitat}" placeholder="Qtt." class="w-16 p-2 border rounded outline-none text-center focus:ring-1 focus:ring-indigo-500" onchange="sincronitzarInputsSeccions()">
                         <button onclick="esborrarSeccioConfig(${idx})" class="text-red-500 hover:text-red-700 p-2 font-bold transition" title="Esborrar secció">✕</button>
                     </div>
                 `;
@@ -1601,11 +1738,13 @@
         }
 
         function afegirNovaSeccioConfig() {
-            appConfig.seccions.push({ titol: "Nova Secció", quantitat: 10 });
+            sincronitzarInputsSeccions();
+            appConfig.seccions.push({ titol: "Nova Secció", quantitat: 10, prefix: "" });
             dibuixarLlistaConfigSeccions();
         }
 
         function esborrarSeccioConfig(index) {
+            sincronitzarInputsSeccions();
             if(appConfig.seccions.length <= 1) return mostrarInfoModal("L'àlbum ha de tenir com a mínim una secció.");
             appConfig.seccions.splice(index, 1);
             dibuixarLlistaConfigSeccions();
@@ -1616,14 +1755,19 @@
             btn.innerText = "Guardant...";
             btn.disabled = true;
 
-            const newSections = [];
+            sincronitzarInputsSeccions();
+            
+            // Verificació d'errors: assegurem que posin un prefix de 2 lletres
             for(let i=0; i<appConfig.seccions.length; i++) {
-                const titol = document.getElementById(`cfg-titol-${i}`).value.trim() || "Secció sense nom";
-                const quantitat = parseInt(document.getElementById(`cfg-quant-${i}`).value) || 0;
-                newSections.push({ titol, quantitat });
+                if(!appConfig.seccions[i].prefix || appConfig.seccions[i].prefix.length !== 2) {
+                    mostrarInfoModal("Error: Totes les seccions han de tenir un Prefix exactament de 2 caràcters (ex: PR, AN, etc.)");
+                    btn.innerText = "Desar Canvis al Servidor";
+                    btn.disabled = false;
+                    return;
+                }
             }
-            appConfig.seccions = newSections;
-            totalCromosAlbum = getTotalCromosConfigurats();
+
+            totalCromosAlbum = getAllCromoIds().length;
 
             try {
                 fetch(APPS_SCRIPT_URL, {
@@ -1636,7 +1780,7 @@
                 
                 setTimeout(() => {
                     tancarModalUI('admin-config-modal');
-                    mostrarInfoModal("Configuració de seccions desada. S'aplicarà de seguida a l'àlbum i al límit de cromos.");
+                    mostrarInfoModal("Configuració desada. Els cromos continuaran vinculats als seus prefixos, independentment de com moguis la secció.");
                     btn.innerText = "Desar Canvis al Servidor";
                     btn.disabled = false;
                     if (currentAdminEditingId) carregarUsuariAdmin(currentAdminEditingId);
