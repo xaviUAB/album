@@ -124,7 +124,9 @@
         <div class="w-full max-w-3xl m-4 text-center">
             <h2 class="text-3xl font-bold mb-2 text-white drop-shadow-md">Nous cromos aconseguits</h2>
             <p class="text-indigo-200 mb-8 text-lg">Clica a cadascun per afegir-lo a la col·lecció!</p>
-            <div id="packet-cards-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 px-4"></div>
+            <div id="packet-cards-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 px-4">
+                <!-- Es generen els cromos via JS -->
+            </div>
             <button id="btn-close-packet" onclick="tancarSobre()" class="hidden mx-auto bg-white text-indigo-900 px-8 py-3 rounded-full font-bold text-lg hover:bg-gray-100 transition shadow-xl border-2 border-indigo-200">Guardar i anar a l'àlbum</button>
         </div>
     </div>
@@ -145,8 +147,9 @@
         <div class="flex justify-between mb-6 flex-wrap gap-4">
             <h2 class="text-2xl font-bold text-gray-800">Panell d'Administració</h2>
             <div class="flex gap-2">
+                <button onclick="obrirAssignacioMassiva()" class="bg-fuchsia-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-fuchsia-700 transition-colors">🎁 Repartir Sobres</button>
                 <button onclick="obrirConfiguracioSeccions()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-indigo-700 transition-colors">Configurar Seccions</button>
-                <button onclick="tancarAdmin()" class="bg-gray-500 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-gray-600 transition-colors">Sortir de l'Admin</button>
+                <button onclick="tancarAdmin()" class="bg-gray-500 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-gray-600 transition-colors">Sortir</button>
             </div>
         </div>
         
@@ -191,7 +194,7 @@
                             <option value="Normal">Normal</option>
                             <option value="Premium">Màgic (Assegurat)</option>
                         </select>
-                        <button onclick="assignarSobreAdmin()" class="bg-fuchsia-600 text-white py-1 px-2 text-sm font-bold hover:bg-fuchsia-700 transition flex items-center justify-center flex-1">
+                        <button onclick="assignarSobreAdminIndividual()" class="bg-fuchsia-600 text-white py-1 px-2 text-sm font-bold hover:bg-fuchsia-700 transition flex items-center justify-center flex-1">
                             Regalar
                         </button>
                     </div>
@@ -202,6 +205,71 @@
                 <h3 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Gestió de la Col·lecció</h3>
                 <div id="admin-collection-grid" class="grid grid-cols-5 md:grid-cols-10 lg:grid-cols-10 gap-2 mb-6 max-h-96 overflow-y-auto p-2 border border-gray-100 rounded bg-gray-50"></div>
                 <button onclick="guardarColleccioAdmin()" id="btn-save-admin" class="w-full bg-emerald-600 text-white p-3 rounded-lg font-bold hover:bg-emerald-700 shadow transition">Guardar tots els canvis</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ASSIGNACIÓ MASSIVA SOBRES ADMIN -->
+    <div id="admin-mass-pack-modal" class="modal">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-4xl m-4 max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Assignació Massiva de Sobres</h2>
+            <p class="text-sm text-gray-600 mb-6 border-b pb-4">Selecciona els perfils als quals vols regalar un sobre i tria'n el tipus.</p>
+            
+            <div class="flex justify-between items-center mb-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div class="flex gap-2">
+                    <button onclick="seleccionarTotsUsuaris()" class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded font-bold text-sm hover:bg-gray-300 transition">Seleccionar Tots</button>
+                    <button onclick="deseleccionarTotsUsuaris()" class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded font-bold text-sm hover:bg-gray-300 transition">Desmarcar Tots</button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-gray-700">Tipus de sobre:</span>
+                    <select id="mass-pack-type" class="border border-fuchsia-300 rounded p-2 text-fuchsia-900 font-bold bg-fuchsia-50 outline-none focus:ring-2 focus:ring-fuchsia-500">
+                        <option value="Normal">Sobre Normal (4 cromos aleatoris)</option>
+                        <option value="Premium">Sobre Màgic (Garanteix 1 no repetit)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-y-auto flex-1 border border-gray-200 rounded-lg mb-6">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-indigo-50 sticky top-0 z-10 shadow-sm">
+                        <tr>
+                            <th class="p-3 w-16 text-center border-b border-gray-200"></th>
+                            <th class="p-3 text-sm font-bold text-indigo-900 border-b border-gray-200">Nom de l'Usuari</th>
+                            <th class="p-3 text-sm font-bold text-indigo-900 border-b border-gray-200">ID / NIU</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mass-pack-users-list" class="divide-y divide-gray-100">
+                        <!-- Es genera via JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="flex gap-4">
+                <button onclick="confirmarAssignacioMassiva()" id="btn-mass-pack-prepare" class="flex-1 bg-fuchsia-600 text-white p-3 rounded-lg font-bold shadow hover:bg-fuchsia-700 transition flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" /></svg>
+                    Preparar Enviament
+                </button>
+                <button onclick="tancarModalUI('admin-mass-pack-modal')" id="btn-mass-pack-cancel" class="bg-gray-200 text-gray-800 p-3 px-8 rounded-lg font-bold hover:bg-gray-300 transition">Cancel·lar</button>
+            </div>
+
+            <!-- Àrea de progrés (amagada per defecte) -->
+            <div id="mass-pack-progress-area" class="hidden mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <p id="mass-pack-status-text" class="text-sm font-bold text-gray-700 mb-2 text-center">Enviant sobres: 0 de 0</p>
+                <div class="w-full bg-gray-200 rounded-full h-4 shadow-inner overflow-hidden mb-4">
+                    <div id="mass-pack-progress-bar" class="bg-gradient-to-r from-fuchsia-400 to-fuchsia-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <button onclick="tancarModalUI('admin-mass-pack-modal')" id="btn-mass-pack-close-final" class="hidden w-full bg-gray-800 text-white p-2 rounded font-bold hover:bg-gray-900 transition">Tancar Finestra</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mass-pack-confirm-overlay" class="modal">
+        <div class="bg-white p-6 rounded-lg text-center max-w-sm shadow-2xl border-t-4 border-fuchsia-500">
+            <h3 class="text-xl font-bold mb-2 text-fuchsia-700">Confirmació d'Enviament</h3>
+            <p id="mass-pack-confirm-desc" class="mb-6 text-gray-600">S'enviaran X sobres tipus Y als usuaris seleccionats. Aquesta acció no es pot desfer.</p>
+            <div class="flex gap-2">
+                <button onclick="tancarModalUI('mass-pack-confirm-overlay')" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded font-bold hover:bg-gray-300 transition">Cancel·lar</button>
+                <button onclick="iniciarRepartimentSobres()" class="flex-1 bg-fuchsia-600 text-white py-3 rounded font-bold hover:bg-fuchsia-700 transition shadow">Sí, regalar!</button>
             </div>
         </div>
     </div>
@@ -545,7 +613,6 @@
             const lines = csvText.split('\n');
             if(lines.length === 0) return {};
             
-            // Un parser senzill però molt sòlid que esquiva les comes escrites dins dels noms o títols
             const parseLine = (line) => {
                 let result = [];
                 let inQuotes = false;
@@ -565,7 +632,6 @@
                 return result.map(c => c.replace(/(^"|"$)/g, '').trim());
             };
 
-            // Convertim a majúscules perquè PR001 coincideixi sempre
             const headers = parseLine(lines[0]).map(h => h.toUpperCase());
             const db = {};
             
@@ -802,7 +868,6 @@
             });
         }
 
-        // --- ANIMACIÓ 3D I LLUM D'ESCRIPTORI (FOIL/GLARE) ---
         function animarCromoAmbRato(event, card) {
             const rect = card.getBoundingClientRect();
             const x = event.clientX - rect.left;
@@ -1435,7 +1500,7 @@
             document.getElementById('global-loader').style.display = 'flex';
             
             try {
-                await recarregarDades(); // Sincronitzem amb Google Sheets abans de tornar
+                await recarregarDades(); 
             } catch (err) {
                 console.warn("Error en sincronitzar l'àlbum:", err);
             } finally {
@@ -1444,7 +1509,6 @@
                 iniciarAlbum(allUsersData[currentUserId] || {}); 
                 actualitzarProgresGlobal();
                 
-                // Amaguem la pantalla de càrrega amb un lleuger retard perquè l'àlbum es munti suaument
                 setTimeout(() => {
                     document.getElementById('global-loader').style.display = 'none';
                 }, 400);
@@ -1563,13 +1627,11 @@
             totalCromosAlbum = getAllCromoIds().length;
             let unicsAdmin = 0;
 
-            // Mostrar cromos agrupats per secció
             appConfig.seccions.forEach((sec, idx) => {
                 const prefix = sec.prefix || `S${idx+1}`;
                 const quantitat = parseInt(sec.quantitat) || 0;
                 if(quantitat <= 0) return;
 
-                // Títol de la secció abans de cada grup
                 grid.innerHTML += `<div class="col-span-5 md:col-span-10 lg:col-span-10 mt-6 mb-2 border-b border-indigo-200"><h4 class="text-lg font-bold text-indigo-800">${sec.titol}</h4></div>`;
 
                 for(let i=1; i<=quantitat; i++) {
@@ -1660,7 +1722,7 @@
             }
         }
 
-        async function assignarSobreAdmin() {
+        async function assignarSobreAdminIndividual() {
             if (!currentAdminEditingId) return;
             
             const tipusSobre = document.getElementById('admin-pack-type').value;
@@ -1682,6 +1744,105 @@
             } catch(e) {
                 mostrarInfoModal("Error de connexió en assignar el sobre.");
             }
+        }
+
+        // --- SISTEMA D'ASSIGNACIÓ MASSIVA DE SOBRES (ADMIN) ---
+        let usuarisSeleccionatsPerSobre = [];
+
+        function obrirAssignacioMassiva() {
+            if (!adminUsersList || adminUsersList.length === 0) {
+                return mostrarInfoModal("Encara s'estan carregant els usuaris. Torna-ho a provar en un instant.");
+            }
+            
+            document.getElementById('mass-pack-progress-area').classList.add('hidden');
+            document.getElementById('btn-mass-pack-prepare').style.display = 'flex';
+            document.getElementById('btn-mass-pack-cancel').style.display = 'block';
+            document.getElementById('btn-mass-pack-close-final').classList.add('hidden');
+            document.getElementById('mass-pack-progress-bar').style.width = '0%';
+            
+            const listContainer = document.getElementById('mass-pack-users-list');
+            listContainer.innerHTML = '';
+            
+            const sortedUsers = [...adminUsersList].sort((a, b) => {
+                const nomA = (a.nom && a.nom !== 'undefined') ? a.nom.toLowerCase() : '';
+                const nomB = (b.nom && b.nom !== 'undefined') ? b.nom.toLowerCase() : '';
+                return nomA.localeCompare(nomB);
+            });
+
+            sortedUsers.forEach((u, idx) => {
+                const nom = u.nom && u.nom !== 'undefined' ? u.nom : '<span class="text-gray-400 italic">Sense nom</span>';
+                listContainer.innerHTML += `
+                    <tr class="hover:bg-indigo-50 transition cursor-pointer" onclick="document.getElementById('chk-user-${idx}').click()">
+                        <td class="p-3 text-center border-b border-gray-100" onclick="event.stopPropagation()">
+                            <input type="checkbox" id="chk-user-${idx}" value="${u.id}" class="mass-user-checkbox w-5 h-5 text-fuchsia-600 rounded focus:ring-fuchsia-500 cursor-pointer">
+                        </td>
+                        <td class="p-3 border-b border-gray-100 text-gray-800">${nom}</td>
+                        <td class="p-3 border-b border-gray-100 text-gray-500 font-mono text-sm">${u.id}</td>
+                    </tr>
+                `;
+            });
+
+            obrirModalUI('admin-mass-pack-modal');
+        }
+
+        function seleccionarTotsUsuaris() {
+            document.querySelectorAll('.mass-user-checkbox').forEach(chk => chk.checked = true);
+        }
+
+        function deseleccionarTotsUsuaris() {
+            document.querySelectorAll('.mass-user-checkbox').forEach(chk => chk.checked = false);
+        }
+
+        function confirmarAssignacioMassiva() {
+            usuarisSeleccionatsPerSobre = [];
+            document.querySelectorAll('.mass-user-checkbox:checked').forEach(chk => {
+                usuarisSeleccionatsPerSobre.push(chk.value);
+            });
+
+            if (usuarisSeleccionatsPerSobre.length === 0) {
+                return mostrarInfoModal("No has seleccionat cap usuari.");
+            }
+
+            const tipus = document.getElementById('mass-pack-type').value;
+            document.getElementById('mass-pack-confirm-desc').innerText = `Estàs a punt d'enviar ${usuarisSeleccionatsPerSobre.length} sobre/s de tipus "${tipus}". Aquesta acció no es pot desfer ni cancel·lar un cop iniciada.`;
+            obrirModalUI('mass-pack-confirm-overlay');
+        }
+
+        async function iniciarRepartimentSobres() {
+            tancarModalUI('mass-pack-confirm-overlay');
+            const tipus = document.getElementById('mass-pack-type').value;
+            const total = usuarisSeleccionatsPerSobre.length;
+            
+            document.getElementById('btn-mass-pack-prepare').style.display = 'none';
+            document.getElementById('btn-mass-pack-cancel').style.display = 'none';
+            document.getElementById('mass-pack-progress-area').classList.remove('hidden');
+            
+            for (let i = 0; i < total; i++) {
+                const userId = usuarisSeleccionatsPerSobre[i];
+                const text = `Enviant sobres: ${i + 1} de ${total}`;
+                const pct = Math.round(((i + 1) / total) * 100);
+                
+                document.getElementById('mass-pack-status-text').innerText = text;
+                document.getElementById('mass-pack-progress-bar').style.width = `${pct}%`;
+
+                try {
+                    await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST', mode: 'no-cors',
+                        body: JSON.stringify({
+                            action: 'assignPackAdmin',
+                            userId: userId,
+                            tipus: tipus
+                        })
+                    });
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                } catch(err) {
+                    console.error("Error enviant sobre a:", userId);
+                }
+            }
+
+            document.getElementById('mass-pack-status-text').innerText = "✅ Repartiment completat amb èxit!";
+            document.getElementById('btn-mass-pack-close-final').classList.remove('hidden');
         }
 
         async function guardarColleccioAdmin() {
